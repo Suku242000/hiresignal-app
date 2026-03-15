@@ -28,6 +28,9 @@ export default {
       if (provider === "anthropic") {
         url = "https://api.anthropic.com/v1/messages";
         headers = { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" };
+      } else if (provider === "groq") {
+        url = "https://api.groq.com/openai/v1/chat/completions";
+        headers = { "Content-Type": "application/json", "Authorization": `Bearer ${key}` };
       } else {
         url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
         headers = { "Content-Type": "application/json" };

@@ -4,15 +4,74 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 async function safeGenerateContent(prompt: string): Promise<string> {
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [{ parts: [{ text: prompt }] }],
-    });
-    return response.text || "";
+    const configStr = localStorage.getItem('hiresignal_ai_config');
+    let provider = 'gemini';
+    let key = process.env.GEMINI_API_KEY || "";
+    let proxy = '';
+
+    if (configStr) {
+      try {
+        const config = JSON.parse(configStr);
+        if (config.provider) provider = config.provider;
+        if (config.key) key = config.key;
+        if (config.proxy) proxy = config.proxy;
+      } catch (e) {}
+    }
+
+    if (proxy && key) {
+      // Use proxy
+      let payload;
+      if (provider === 'gemini') {
+        payload = { 
+          contents: [{ parts: [{ text: prompt }] }]
+        };
+      } else if (provider === 'anthropic') {
+        payload = { 
+          model: 'claude-3-5-sonnet-20240620', 
+          max_tokens: 4000, 
+          messages: [{ role: 'user', content: prompt }] 
+        };
+      } else {
+        payload = { 
+          model: 'llama3-8b-8192', 
+          messages: [{ role: 'user', content: prompt }] 
+        };
+      }
+
+      const res = await fetch(proxy, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          provider: provider, 
+          apiKey: key, 
+          payload 
+        })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      
+      if (provider === 'gemini') {
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      } else if (provider === 'anthropic') {
+        return data.content?.[0]?.text || "";
+      } else {
+        // Groq or others
+        return data.choices?.[0]?.message?.content || data.response || "";
+      }
+    } else {
+      // Fallback to direct Gemini API if no proxy is set
+      const ai = new GoogleGenAI({ apiKey: key });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: [{ parts: [{ text: prompt }] }],
+      });
+      return response.text || "";
+    }
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
+    console.error("AI API Error:", error);
     if (error.message?.includes("API key not valid") || error.message?.includes("API_KEY_INVALID")) {
-      throw new Error("Invalid or missing Gemini API key. Please check your configuration.");
+      throw new Error("Invalid or missing API key. Please check your configuration.");
     }
     if (error.message?.includes("quota")) {
       throw new Error("API quota exceeded. Please try again later.");

@@ -17,6 +17,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
   const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [testError, setTestError] = useState('');
 
+  useEffect(() => {
+    const saved = localStorage.getItem('hiresignal_ai_config');
+    if (saved) {
+      try {
+        setTestForm(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (testForm.key || testForm.proxy) {
+      localStorage.setItem('hiresignal_ai_config', JSON.stringify(testForm));
+    }
+  }, [testForm]);
+
   const handleTest = async () => {
     if (!testForm.key || !testForm.proxy) {
       setTestStatus('error');
@@ -41,7 +56,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
           messages: [{ role: 'user', content: 'Reply with one word: OK' }] 
         };
       } else {
-        payload = { prompt: 'Reply with one word: OK' };
+        payload = { 
+          model: 'llama3-8b-8192', 
+          messages: [{ role: 'user', content: 'Reply with one word: OK' }] 
+        };
       }
 
       const res = await fetch(testForm.proxy, {
