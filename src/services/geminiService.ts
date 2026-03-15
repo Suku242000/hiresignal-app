@@ -10,10 +10,12 @@ export async function generateOnboardingPlan(data: {
   level: string;
   work: string;
   goals: string;
+  email: string;
 }) {
   const prompt = `You are an expert HR onboarding specialist. Create a detailed, practical 30-day onboarding plan.
 
 Employee: ${data.name}
+Email: ${data.email}
 Role: ${data.role}
 Department: ${data.dept || 'Not specified'}
 Start Date: ${data.start || 'Upcoming'}
@@ -24,7 +26,7 @@ Key Goals: ${data.goals || 'Standard onboarding goals'}
 Write a 30-day onboarding plan with 4 sections:
 
 WEEK 1 — Orientation & Setup
-5 specific tasks for admin, tools, culture, introductions.
+5 specific tasks for admin, tools, culture, introductions. Ensure the employee's email (${data.email}) is incorporated into the introductions or as a contact point for administrative tasks.
 
 WEEK 2 — Learning & Immersion
 5 tasks for role-specific learning, meeting stakeholders, shadowing.

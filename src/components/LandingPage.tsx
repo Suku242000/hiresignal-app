@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'motion/react';
-import { ArrowRight, Rocket, Zap, Brain, Target, FileText, Radio, Sprout, Search, Plus, TrendingUp, Users, UserMinus, Activity, CheckCircle2, DoorOpen, BarChart3 } from 'lucide-react';
+import { ArrowRight, Rocket, Zap, Brain, Target, FileText, Radio, Sprout, Search, Plus, TrendingUp, Users, UserMinus, Activity, CheckCircle2, DoorOpen, BarChart3, ChevronDown } from 'lucide-react';
 
 interface LandingPageProps {
   onLaunch: () => void;
@@ -11,6 +11,56 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stats, setStats] = useState({ tools: 0 });
   const [activeStep, setActiveStep] = useState(1);
+
+  // Connection Test State
+  const [testForm, setTestForm] = useState({ provider: 'gemini', key: '', proxy: '' });
+  const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [testError, setTestError] = useState('');
+
+  const handleTest = async () => {
+    if (!testForm.key || !testForm.proxy) {
+      setTestStatus('error');
+      setTestError('Please fill in both the API key and proxy URL first.');
+      return;
+    }
+
+    setTestStatus('loading');
+    setTestError('');
+
+    try {
+      let payload;
+      if (testForm.provider === 'gemini') {
+        payload = { 
+          contents: [{ parts: [{ text: 'Reply with one word: OK' }] }], 
+          generationConfig: { maxOutputTokens: 5 } 
+        };
+      } else {
+        payload = { 
+          model: 'claude-3-5-sonnet-20240620', 
+          max_tokens: 5, 
+          messages: [{ role: 'user', content: 'Reply with one word: OK' }] 
+        };
+      }
+
+      const res = await fetch(testForm.proxy, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          provider: testForm.provider, 
+          apiKey: testForm.key, 
+          payload 
+        })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      
+      setTestStatus('success');
+    } catch (e: any) {
+      setTestStatus('error');
+      setTestError(e.message || 'Connection failed — check proxy URL and API key.');
+    }
+  };
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -103,10 +153,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
     };
     requestAnimationFrame(animateStats);
 
+    // Reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
+      observer.disconnect();
     };
   }, []);
 
@@ -131,7 +193,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
         <b className="text-[#3EEECF] font-semibold">→ Career Growth, Pulse Surveys, Performance Coach, JD Builder</b>
       </div>
 
-      <div className="relative z-10 max-w-[1160px] mx-auto px-8 pb-32">
+      <div className="relative z-10 max-w-[1160px] mx-auto px-8 pb-16">
         {/* Nav */}
         <nav className="flex items-center justify-between py-5.5 sticky top-0 z-[200] bg-[#090D1A]/85 backdrop-blur-3xl border-b border-white/6 mb-0">
           <div className="font-display text-[21px] font-extrabold bg-linear-to-br from-[#7B8BFF] to-[#0FD4B0] bg-clip-text text-transparent tracking-tight cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -198,7 +260,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
           </motion.div>
 
           {/* Proof Bar */}
-          <div className="mt-20 pt-8 border-t border-white/6 text-center">
+          <div className="mt-16 pt-8 border-t border-white/6 text-center">
             <div className="text-[11px] font-semibold uppercase tracking-[1.5px] text-[#B4C4F0]/45 mb-5">Works alongside the tools you already use</div>
             <div className="flex items-center justify-center gap-10 flex-wrap opacity-50">
               {['Google AI Studio', 'Anthropic Claude', 'Cloudflare Workers', 'GitHub Pages', 'Netlify', 'Vercel'].map(logo => (
@@ -226,31 +288,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
         </div>
 
         {/* Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/6 border border-white/6 rounded-2xl overflow-hidden mb-16 reveal">
-          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors">
-            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#7B8BFF] to-[#9B6DFF] bg-clip-text text-transparent">{stats.tools}</div>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/6 border border-white/6 rounded-2xl overflow-hidden mb-16"
+        >
+          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#7B8BFF] to-[#9B6DFF] bg-clip-text text-transparent group-hover:scale-110 transition-transform">{stats.tools}</div>
             <div className="text-xs font-semibold text-[#B4C4F0]/45 uppercase tracking-wide">AI tools</div>
             <div className="text-[11px] text-[#B4C4F0]/45 mt-1 opacity-60">All in one platform</div>
           </div>
-          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors">
-            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent">100K</div>
+          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent group-hover:scale-110 transition-transform">100K</div>
             <div className="text-xs font-semibold text-[#B4C4F0]/45 uppercase tracking-wide">Free requests/day</div>
             <div className="text-[11px] text-[#B4C4F0]/45 mt-1 opacity-60">Via Cloudflare proxy</div>
           </div>
-          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors">
-            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#FF6B6B] to-[#FFB347] bg-clip-text text-transparent">5 min</div>
+          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#FF6B6B] to-[#FFB347] bg-clip-text text-transparent group-hover:scale-110 transition-transform">5 min</div>
             <div className="text-xs font-semibold text-[#B4C4F0]/45 uppercase tracking-wide">Setup time</div>
             <div className="text-[11px] text-[#B4C4F0]/45 mt-1 opacity-60">Zero coding needed</div>
           </div>
-          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors">
-            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#9B6DFF] to-[#7B8BFF] bg-clip-text text-transparent">$0</div>
+          <div className="bg-[#141C35] p-7 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[40px] font-extrabold leading-none mb-1.5 bg-linear-to-br from-[#9B6DFF] to-[#7B8BFF] bg-clip-text text-transparent group-hover:scale-110 transition-transform">$0</div>
             <div className="text-xs font-semibold text-[#B4C4F0]/45 uppercase tracking-wide">Platform cost</div>
             <div className="text-[11px] text-[#B4C4F0]/45 mt-1 opacity-60">Bring your own API key</div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Problem Section */}
-        <div className="mb-24 p-15 bg-[#141C35] border border-white/10 rounded-[28px] reveal">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="mb-16 p-15 bg-[#141C35] border border-white/10 rounded-[28px]"
+        >
           <div className="text-center mb-12">
             <div className="text-[11px] font-bold uppercase tracking-[2px] text-[#B4C4F0]/45 flex items-center justify-center gap-2.5 mb-3.5">
               <span className="w-8 h-px bg-white/10" /> Why HireSignal exists <span className="w-8 h-px bg-white/10" />
@@ -261,36 +333,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             <p className="text-[15px] text-[#DCE4FF]/70 max-w-[520px] mx-auto leading-[1.7] font-normal">We researched the biggest HR pain points of 2026. Every single tool we built solves a real, documented problem.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 hover:border-white/10 hover:bg-[#111830] hover:-translate-y-1 transition-all">
+            <motion.div whileHover={{ y: -5 }} className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 hover:border-white/10 hover:bg-[#111830] transition-all">
               <div className="text-2xl mb-3">😤</div>
               <div className="font-display text-[28px] font-extrabold text-[#FF6B6B] mb-1">98%</div>
               <p className="text-[13px] text-[#DCE4FF]/70 leading-[1.6]">of CHROs say their performance management process is broken and needs replacing urgently</p>
               <div className="text-[11px] text-[#B4C4F0]/45 mt-2 italic">Gartner HR Survey, 2026 → We built the Performance Coach</div>
-            </div>
-            <div className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 hover:border-white/10 hover:bg-[#111830] hover:-translate-y-1 transition-all">
+            </motion.div>
+            <motion.div whileHover={{ y: -5 }} className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 hover:border-white/10 hover:bg-[#111830] transition-all">
               <div className="text-2xl mb-3">😶</div>
               <div className="font-display text-[28px] font-extrabold text-[#FFB347] mb-1">26%</div>
               <p className="text-[13px] text-[#DCE4FF]/70 leading-[1.6]">of employees globally feel engaged at work — an all-time low. Most HR teams have no idea who's at risk until they resign</p>
               <div className="text-[11px] text-[#B4C4F0]/45 mt-2 italic">Gallup State of Global Workplace → We built Retention Risk Score & Pulse Surveys</div>
-            </div>
-            <div className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 hover:border-white/10 hover:bg-[#111830] hover:-translate-y-1 transition-all">
+            </motion.div>
+            <motion.div whileHover={{ y: -5 }} className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 hover:border-white/10 hover:bg-[#111830] transition-all">
               <div className="text-2xl mb-3">🔄</div>
               <div className="font-display text-[28px] font-extrabold text-[#7B8BFF] mb-1">64%</div>
               <p className="text-[13px] text-[#DCE4FF]/70 leading-[1.6]">of HR leaders say developing future leaders is their #1 priority — yet most have no structured growth pathways for employees</p>
               <div className="text-[11px] text-[#B4C4F0]/45 mt-2 italic">McLean & Company HR Trends → We built the Career Growth Planner</div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Tools Section */}
-        <div className="mb-24" id="tools-sec">
+        <div className="mb-16" id="tools-sec">
           <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
-            <div>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
               <div className="text-[11px] font-bold uppercase tracking-[2px] text-[#B4C4F0]/45 flex items-center justify-start gap-2.5 mb-3.5">
                 <span className="w-0" /> All Tools
               </div>
               <h2 className="font-display text-[clamp(24px,3vw,36px)] font-extrabold tracking-tight leading-[1.15]">Everything your team needs,<br /><span className="bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent">nothing it doesn't</span></h2>
-            </div>
+            </motion.div>
             <button className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-white/6 border border-white/10 text-[#F0F4FF] hover:bg-white/9 transition-all" onClick={onLaunch}>View all tools →</button>
           </div>
 
@@ -360,7 +436,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
         </div>
 
         {/* How It Works */}
-        <div className="mb-24" id="how-sec">
+        <div className="mb-16" id="how-sec">
           <div className="text-center mb-10 reveal">
             <div className="text-[11px] font-bold uppercase tracking-[2px] text-[#B4C4F0]/45 flex items-center justify-center gap-2.5 mb-3.5">
               <span className="w-8 h-px bg-white/10" /> How It Works <span className="w-8 h-px bg-white/10" />
@@ -394,8 +470,32 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
           </div>
         </div>
 
+        {/* Trust Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/6 border border-white/6 rounded-2xl overflow-hidden mb-16"
+        >
+          <div className="bg-[#141C35] p-9 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[50px] font-extrabold leading-none mb-2 bg-linear-to-br from-[#FF6B6B] to-[#FFB347] bg-clip-text text-transparent">98%</div>
+            <p className="text-sm text-[#DCE4FF]/70 leading-relaxed mb-1.5">of CHROs say current performance management is broken and needs replacing</p>
+            <div className="text-[11px] text-[#B4C4F0]/45 italic">Gartner HR Survey, 2026</div>
+          </div>
+          <div className="bg-[#141C35] p-9 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[50px] font-extrabold leading-none mb-2 bg-linear-to-br from-[#7B8BFF] to-[#9B6DFF] bg-clip-text text-transparent">26%</div>
+            <p className="text-sm text-[#DCE4FF]/70 leading-relaxed mb-1.5">of employees globally feel engaged — the rest are disengaged, costing businesses trillions</p>
+            <div className="text-[11px] text-[#B4C4F0]/45 italic">Gallup State of Global Workplace</div>
+          </div>
+          <div className="bg-[#141C35] p-9 text-center hover:bg-[#1A2340] transition-colors group">
+            <div className="font-display text-[50px] font-extrabold leading-none mb-2 bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent">64%</div>
+            <p className="text-sm text-[#DCE4FF]/70 leading-relaxed mb-1.5">of HR leaders say developing future leaders is their single biggest priority in 2026</p>
+            <div className="text-[11px] text-[#B4C4F0]/45 italic">McLean & Company HR Trends</div>
+          </div>
+        </motion.div>
+
         {/* Setup Walkthrough */}
-        <div className="bg-[#141C35] border border-white/10 rounded-[28px] p-13 mb-24 relative overflow-hidden reveal" id="setup-sec">
+        <div className="bg-[#141C35] border border-white/10 rounded-[28px] p-13 mb-16 relative overflow-hidden reveal" id="setup-sec">
           <div className="absolute top-[-80px] right-[-80px] w-75 h-75 rounded-full bg-radial-gradient(var(--indigo),transparent) opacity-10 pointer-events-none" />
           <div className="text-left mb-10">
             <div className="text-[11px] font-bold uppercase tracking-[2px] text-[#B4C4F0]/45 flex items-center justify-start gap-2.5 mb-2">
@@ -426,24 +526,62 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             <div className="bg-[#0D1225] border border-white/6 rounded-2xl p-6 lg:sticky lg:top-25">
               <div className="text-[11px] font-bold uppercase tracking-wider text-[#B4C4F0]/45 mb-3">Quick Connection Test</div>
               <div className="flex flex-col gap-3.5 mb-3.5">
-                <div>
+                <div className="relative">
                   <div className="text-[11px] font-semibold text-[#B4C4F0]/45 uppercase tracking-wide mb-1.5">AI Provider</div>
-                  <select className="w-full bg-[#111830] border border-white/6 rounded-lg px-4 py-2.5 font-sans text-[13px] text-[#F0F4FF] outline-hidden cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg_xmlns=%22http://www.w3.org/2000/svg%22_width=%2212%22_height=%228%22_fill=%22none%22%3E%3Cpath_d=%22M1_1l5_5_5-5%22_stroke=%22rgba(180,196,240,0.45)%22_stroke-width=%221.5%22_stroke-linecap=%22round%22/%3E%3C/svg%3E')] bg-no-repeat bg-[position:right_13px_center] pr-9">
-                    <option value="gemini">Gemini (Google AI Studio)</option>
-                    <option value="anthropic">Claude (Anthropic)</option>
-                  </select>
+                  <div className="relative">
+                    <select 
+                      value={testForm.provider}
+                      onChange={(e) => setTestForm({ ...testForm, provider: e.target.value })}
+                      className="w-full bg-[#111830] border border-white/6 rounded-lg px-4 py-2.5 font-sans text-[13px] text-[#F0F4FF] outline-hidden cursor-pointer appearance-none pr-10"
+                    >
+                      <option value="gemini">Gemini (Google AI Studio)</option>
+                      <option value="anthropic">Claude (Anthropic)</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B4C4F0]/45">
+                      <ChevronDown size={14} />
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <div className="text-[11px] font-semibold text-[#B4C4F0]/45 uppercase tracking-wide mb-1.5">API Key</div>
-                  <input type="password" placeholder="Paste your API key..." className="w-full bg-[#111830] border border-white/6 rounded-lg px-4 py-2.5 font-sans text-[13px] text-[#F0F4FF] outline-hidden focus:border-[#5B6CF9]/50 transition-colors" />
+                  <input 
+                    type="password" 
+                    placeholder="Paste your API key..." 
+                    value={testForm.key}
+                    onChange={(e) => setTestForm({ ...testForm, key: e.target.value })}
+                    className="w-full bg-[#111830] border border-white/6 rounded-lg px-4 py-2.5 font-sans text-[13px] text-[#F0F4FF] outline-hidden focus:border-[#5B6CF9]/50 transition-colors" 
+                  />
                 </div>
                 <div>
                   <div className="text-[11px] font-semibold text-[#B4C4F0]/45 uppercase tracking-wide mb-1.5">Cloudflare Worker URL</div>
-                  <input type="text" placeholder="https://your-worker.workers.dev" className="w-full bg-[#111830] border border-white/6 rounded-lg px-4 py-2.5 font-sans text-[13px] text-[#F0F4FF] outline-hidden focus:border-[#5B6CF9]/50 transition-colors" />
+                  <input 
+                    type="text" 
+                    placeholder="https://your-worker.workers.dev" 
+                    value={testForm.proxy}
+                    onChange={(e) => setTestForm({ ...testForm, proxy: e.target.value })}
+                    className="w-full bg-[#111830] border border-white/6 rounded-lg px-4 py-2.5 font-sans text-[13px] text-[#F0F4FF] outline-hidden focus:border-[#5B6CF9]/50 transition-colors" 
+                  />
                 </div>
               </div>
-              <button className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] text-white font-semibold text-sm shadow-[0_0_40px_rgba(91,108,249,0.25)] hover:shadow-[0_0_50px_rgba(91,108,249,0.4)] transition-all">🔌 Test Connection</button>
-              <div className="hidden items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-lg mt-2 bg-[#22C55E]/8 border border-[#22C55E]/20 text-[#22C55E]">✅ Connection successful — AI is live!</div>
+              <button 
+                onClick={handleTest}
+                disabled={testStatus === 'loading'}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] text-white font-semibold text-sm shadow-[0_0_40px_rgba(91,108,249,0.25)] hover:shadow-[0_0_50px_rgba(91,108,249,0.4)] transition-all disabled:opacity-50"
+              >
+                {testStatus === 'loading' ? 'Testing...' : '🔌 Test Connection'}
+              </button>
+              
+              {testStatus === 'success' && (
+                <div className="flex items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-lg mt-2 bg-[#22C55E]/8 border border-[#22C55E]/20 text-[#22C55E]">
+                  ✅ Connection successful — AI is live!
+                </div>
+              )}
+              
+              {testStatus === 'error' && (
+                <div className="flex items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-lg mt-2 bg-[#FF6B6B]/8 border border-[#FF6B6B]/20 text-[#FF6B6B]">
+                  ❌ {testError}
+                </div>
+              )}
               <div className="mt-4 pt-4 border-t border-white/6">
                 <p className="text-xs text-[#B4C4F0]/45 leading-[1.7] mb-3">Once connected, open your apps and use the same key + proxy URL in each one. Your settings are saved in the app session.</p>
                 <div className="flex gap-2 flex-wrap">
@@ -456,7 +594,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
         </div>
 
         {/* Final CTA */}
-        <div className="bg-linear-to-br from-[#5B6CF9]/8 via-[#0FD4B0]/6 to-[#9B6DFF]/6 border border-white/10 rounded-[28px] p-18 md:px-12 text-center relative overflow-hidden reveal mb-24">
+        <div className="bg-linear-to-br from-[#5B6CF9]/8 via-[#0FD4B0]/6 to-[#9B6DFF]/6 border border-white/10 rounded-[28px] p-18 md:px-12 text-center relative overflow-hidden reveal mb-16">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full bg-radial-gradient(rgba(91,108,249,0.08),transparent) pointer-events-none" />
           <h2 className="font-display text-[clamp(28px,4vw,50px)] font-extrabold tracking-tight mb-4 relative">Ready to fix your HR team's<br /><span className="bg-linear-to-br from-[#7B8BFF] via-[#9B6DFF] to-[#0FD4B0] bg-clip-text text-transparent">biggest headaches?</span></h2>
           <p className="text-base text-[#DCE4FF]/70 max-w-[460px] mx-auto mb-10 leading-[1.75] relative font-normal">Everything is free, open source, and runs on your own AI key. No subscriptions. No data lock-in. Just better HR.</p>

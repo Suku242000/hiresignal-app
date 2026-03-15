@@ -1,11 +1,41 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap');
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bricolage Grotesque", sans-serif;
   --font-syne: "Syne", sans-serif;
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
+}
+
+@layer utilities {
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Glow Effects */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(91, 108, 249, 0.15);
+  }
+  .glow-success {
+    box-shadow: 0 0 20px rgba(15, 212, 176, 0.15);
+  }
+  .glow-warning {
+    box-shadow: 0 0 20px rgba(255, 179, 71, 0.15);
+  }
+  .glow-danger {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.15);
+  }
 }
 
 @layer base {
@@ -57,11 +87,9 @@
 
     /* Legacy compatibility or specific overrides */
     --pink: #FF3CAC;
-    /* --purple is already defined above */
     --blue: #2B86C5;
     --cyan: #00F5D4;
     --orange: #FF8C42;
-    /* --green is already defined above */
     --yellow: #FFE14D;
     --dark: #08080f;
     --dark2: #0f0f1e;
@@ -155,11 +183,11 @@
   }
 
   .scard {
-    @apply bg-white/4 border border-white/8 rounded-[16px] p-[22px_24px] text-center backdrop-blur-[16px] transition-all duration-250;
+    @apply bg-white/4 border border-white/8 rounded-[24px] backdrop-blur-[20px] transition-all duration-300 overflow-hidden;
   }
 
   .scard:hover {
-    @apply border-white/15 -translate-y-1;
+    @apply border-white/12;
   }
 
   .gcard {
@@ -171,14 +199,22 @@
   }
 
   .mcard {
-    @apply bg-white/4 border border-white/8 rounded-[16px] p-5 cursor-pointer transition-all duration-300 backdrop-blur-xl text-center relative overflow-hidden;
+    @apply bg-white/4 border border-white/8 rounded-[20px] p-5 cursor-pointer transition-all duration-300 backdrop-blur-xl text-center relative overflow-hidden flex flex-col items-center justify-center;
   }
   .mcard::before {
     content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-300 rounded-[16px];
+    @apply absolute inset-0 opacity-0 transition-all duration-500 rounded-[20px] scale-95;
   }
   .mcard:hover::before, .mcard.active::before {
-    @apply opacity-100;
+    @apply opacity-100 scale-100;
+  }
+  
+  .mcard:hover {
+    @apply border-white/15 -translate-y-1;
+  }
+
+  .mcard.active {
+    @apply scale-[0.98];
   }
   
   .m1::before { background: linear-gradient(135deg, rgba(255,140,66,0.12), rgba(255,60,172,0.08)); }

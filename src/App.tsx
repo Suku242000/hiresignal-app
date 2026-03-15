@@ -147,9 +147,11 @@ export default function App() {
     { name: 'Apr', score: 28 },
     { name: 'May', score: 24 },
   ]);
+  const [history, setHistory] = useState<{ type: string, title: string, content: string, date: string }[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // Form States
-  const [onboardForm, setOnboardForm] = useState({ name: '', role: '', dept: '', start: '', level: '', work: 'Remote', goals: '' });
+  const [onboardForm, setOnboardForm] = useState({ name: '', role: '', dept: '', start: '', level: '', work: 'Remote', goals: '', email: '' });
   const [exitForm, setExitForm] = useState({ name: '', role: '', years: '', reason: '', notes: '', projects: '' });
   const [riskForm, setRiskForm] = useState({ name: '', role: '', tenure: '1–2 years', perf: 'Meets expectations', obs: '', changes: '' });
   
@@ -180,20 +182,36 @@ export default function App() {
   const [surveyResult, setSurveyResult] = useState('');
   const [growthResult, setGrowthResult] = useState('');
 
+  // UI States
+  const [toast, setToast] = useState<{ show: boolean, msg: string }>({ show: false, msg: '' });
+
   // Loading States
   const [loading, setLoading] = useState({ onboard: false, exit: false, risk: false, perf: false, jd: false, survey: false, growth: false });
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    setToast({ show: true, msg: 'Copied to clipboard!' });
+    setTimeout(() => setToast({ show: false, msg: '' }), 3000);
+  };
+
+  const addToHistory = (type: string, title: string, content: string) => {
+    const entry = {
+      type,
+      title,
+      content,
+      date: new Date().toLocaleString()
+    };
+    setHistory(prev => [entry, ...prev].slice(0, 10)); // Keep last 10
   };
 
   const handleOnboard = async () => {
-    if (!onboardForm.name || !onboardForm.role) return alert('Please enter name and role');
+    if (!onboardForm.name || !onboardForm.role || !onboardForm.email) return alert('Please enter name, role, and email');
     setLoading(prev => ({ ...prev, onboard: true }));
     try {
       const res = await generateOnboardingPlan(onboardForm);
       setOnboardResult(res);
       setStats(prev => ({ ...prev, hires: prev.hires + 1 }));
+      addToHistory('Onboarding', `Plan for ${onboardForm.name}`, res);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, onboard: false })); }
   };
 
@@ -204,6 +222,7 @@ export default function App() {
       const res = await generateExitReport(exitForm);
       setExitResult(res);
       setStats(prev => ({ ...prev, exits: prev.exits + 1 }));
+      addToHistory('Exit Intelligence', `Report for ${exitForm.name}`, res);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, exit: false })); }
   };
 
@@ -228,6 +247,7 @@ export default function App() {
       setRiskScores(newScores);
       const avg = Math.round(newScores.reduce((a, b) => a + b.score, 0) / newScores.length);
       setStats(prev => ({ ...prev, avgRisk: `${avg}%` }));
+      addToHistory('Retention Risk', `Analysis for ${riskForm.name}`, full);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, risk: false })); }
   };
 
@@ -235,12 +255,14 @@ export default function App() {
     setLoading(prev => ({ ...prev, perf: true }));
     try {
       let data;
-      if (perfSubTab === 1) data = perfForm;
-      else if (perfSubTab === 2) data = ooForm;
-      else if (perfSubTab === 3) data = pipForm;
-      else data = recForm;
+      let title = "";
+      if (perfSubTab === 1) { data = perfForm; title = `Review for ${perfForm.name}`; }
+      else if (perfSubTab === 2) { data = ooForm; title = `1-on-1: ${ooForm.mgr} & ${ooForm.emp}`; }
+      else if (perfSubTab === 3) { data = pipForm; title = `PIP for ${pipForm.name}`; }
+      else { data = recForm; title = `Recognition for ${recForm.name}`; }
       const res = await generatePerformanceFeedback(perfSubTab, data);
       setPerfResult(res);
+      addToHistory('Performance', title, res);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, perf: false })); }
   };
 
@@ -250,6 +272,7 @@ export default function App() {
     try {
       const res = await generateJobDescription(jdForm);
       setJdResult(res);
+      addToHistory('Job Description', jdForm.title, res);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, jd: false })); }
   };
 
@@ -257,8 +280,10 @@ export default function App() {
     setLoading(prev => ({ ...prev, survey: true }));
     try {
       const data = surveySubTab === 1 ? svForm : saForm;
+      const title = surveySubTab === 1 ? `Survey: ${svForm.team}` : `Analysis: ${saForm.team}`;
       const res = await generatePulseSurvey(surveySubTab, data);
       setSurveyResult(res);
+      addToHistory('Pulse Survey', title, res);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, survey: false })); }
   };
 
@@ -266,11 +291,13 @@ export default function App() {
     setLoading(prev => ({ ...prev, growth: true }));
     try {
       let data;
-      if (growthSubTab === 1) data = gpForm;
-      else if (growthSubTab === 2) data = prForm;
-      else data = upForm;
+      let title = "";
+      if (growthSubTab === 1) { data = gpForm; title = `Growth Plan: ${gpForm.name}`; }
+      else if (growthSubTab === 2) { data = prForm; title = `Promotion: ${prForm.name}`; }
+      else { data = upForm; title = `Upskilling: ${upForm.name}`; }
       const res = await generateCareerPlan(growthSubTab, data);
       setGrowthResult(res);
+      addToHistory('Career Growth', title, res);
     } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, growth: false })); }
   };
 
@@ -307,8 +334,11 @@ export default function App() {
             HireSignal
             <span className="block text-[13px] font-medium text-[#B4C4F0]/45 tracking-normal mt-[-2px]">HR Intelligence Platform</span>
           </div>
-          <div className="bg-white/4 border border-white/8 rounded-full px-4 py-1.5 text-xs text-[#B4C4F0]/45 backdrop-blur-xl flex items-center gap-2">
-            Expansion Pack Active &middot; <span className="text-[#0FD4B0] font-semibold">Gemini 2.0 Flash</span>
+          <div className="flex items-center gap-2.5">
+            <button className="hidden sm:block px-5 py-2 rounded-lg text-[13px] font-semibold bg-white/6 border border-white/10 text-[#DCE4FF]/70 hover:bg-white/9 hover:text-[#F0F4FF] transition-all" onClick={() => setShowHistory(true)}>History</button>
+            <div className="bg-white/4 border border-white/8 rounded-full px-4 py-1.5 text-xs text-[#B4C4F0]/45 backdrop-blur-xl flex items-center gap-2">
+              Expansion Pack Active &middot; <span className="text-[#0FD4B0] font-semibold">Gemini 2.0 Flash</span>
+            </div>
           </div>
         </nav>
 
@@ -330,33 +360,42 @@ export default function App() {
 
         {/* Stats Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-          <div className="bg-[#141C35] border border-white/8 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-5 hover:bg-[#1A2340] transition-colors">
-            <div className="w-14 h-14 rounded-2xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center text-[#7B8BFF]">
+          <motion.div 
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="bg-[#141C35] border border-white/8 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-5 hover:bg-[#1A2340] transition-colors cursor-default group"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#5B6CF9]/10 border border-[#5B6CF9]/20 flex items-center justify-center text-[#7B8BFF] group-hover:bg-[#5B6CF9]/20 transition-colors">
               <Users size={28} />
             </div>
             <div>
               <div className="text-[11px] font-bold text-[#B4C4F0]/45 uppercase tracking-wider mb-1">New Hires (YTD)</div>
               <div className="text-3xl font-display font-extrabold text-[#F0F4FF]">{stats.hires}</div>
             </div>
-          </div>
-          <div className="bg-[#141C35] border border-white/8 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-5 hover:bg-[#1A2340] transition-colors">
-            <div className="w-14 h-14 rounded-2xl bg-[#FF6B6B]/10 border border-[#FF6B6B]/20 flex items-center justify-center text-[#FF6B6B]">
+          </motion.div>
+          <motion.div 
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="bg-[#141C35] border border-white/8 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-5 hover:bg-[#1A2340] transition-colors cursor-default group"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#FF6B6B]/10 border border-[#FF6B6B]/20 flex items-center justify-center text-[#FF6B6B] group-hover:bg-[#FF6B6B]/20 transition-colors">
               <UserMinus size={28} />
             </div>
             <div>
               <div className="text-[11px] font-bold text-[#B4C4F0]/45 uppercase tracking-wider mb-1">Total Exits</div>
               <div className="text-3xl font-display font-extrabold text-[#F0F4FF]">{stats.exits}</div>
             </div>
-          </div>
-          <div className="bg-[#141C35] border border-white/8 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-5 hover:bg-[#1A2340] transition-colors">
-            <div className="w-14 h-14 rounded-2xl bg-[#FFB347]/10 border border-[#FFB347]/20 flex items-center justify-center text-[#FFB347]">
+          </motion.div>
+          <motion.div 
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="bg-[#141C35] border border-white/8 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-5 hover:bg-[#1A2340] transition-colors cursor-default group"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#FFB347]/10 border border-[#FFB347]/20 flex items-center justify-center text-[#FFB347] group-hover:bg-[#FFB347]/20 transition-colors">
               <Activity size={28} />
             </div>
             <div>
               <div className="text-[11px] font-bold text-[#B4C4F0]/45 uppercase tracking-wider mb-1">Avg Retention Risk</div>
               <div className="text-3xl font-display font-extrabold text-[#F0F4FF]">{stats.avgRisk}</div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div className="text-[11px] font-bold uppercase tracking-[1.5px] text-[#B4C4F0]/35 mb-6 flex items-center gap-3">
@@ -364,41 +403,34 @@ export default function App() {
         </div>
 
         {/* Module Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-12">
           <button onClick={() => setActiveTab('perf')} className={`mcard m1 ${activeTab === 'perf' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">🎯</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Performance Coach</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">Feedback & reviews</div>
+            <span className="text-2xl mb-2 block relative z-10">🎯</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Performance</div>
           </button>
           <button onClick={() => setActiveTab('jd')} className={`mcard m2 ${activeTab === 'jd' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">📝</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Job Description</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">Attract top talent</div>
+            <span className="text-2xl mb-2 block relative z-10">📝</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Job Desc</div>
           </button>
           <button onClick={() => setActiveTab('survey')} className={`mcard m3 ${activeTab === 'survey' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">📡</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Pulse Surveys</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">Engagement signals</div>
+            <span className="text-2xl mb-2 block relative z-10">📡</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Surveys</div>
           </button>
           <button onClick={() => setActiveTab('growth')} className={`mcard m4 ${activeTab === 'growth' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">🌱</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Career Growth</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">Retention via growth</div>
+            <span className="text-2xl mb-2 block relative z-10">🌱</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Growth</div>
           </button>
           <button onClick={() => setActiveTab('onboard')} className={`mcard m5 ${activeTab === 'onboard' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">🚀</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Onboarding</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">30-day plans</div>
+            <span className="text-2xl mb-2 block relative z-10">🚀</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Onboard</div>
           </button>
           <button onClick={() => setActiveTab('exit')} className={`mcard m6 ${activeTab === 'exit' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">🚪</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Exit Intelligence</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">Knowledge transfer</div>
+            <span className="text-2xl mb-2 block relative z-10">🚪</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Exits</div>
           </button>
           <button onClick={() => setActiveTab('risk')} className={`mcard m7 ${activeTab === 'risk' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2.5 block relative z-10">📊</span>
-            <div className="font-display text-[13px] font-extrabold relative z-10 leading-tight">Retention Risk</div>
-            <div className="text-[11px] text-[#B4C4F0]/35 mt-1 relative z-10">Predictive analysis</div>
+            <span className="text-2xl mb-2 block relative z-10">📊</span>
+            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Risk</div>
           </button>
         </div>
 
@@ -406,15 +438,15 @@ export default function App() {
           {/* PERFORMANCE COACH */}
           {activeTab === 'perf' && (
             <motion.div key="perf" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#5B6CF9]/30 to-[#7B8BFF]/20 border border-[#5B6CF9]/30 shrink-0">🎯</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#5B6CF9]/30 to-[#7B8BFF]/20 border border-[#5B6CF9]/30 shrink-0 shadow-indigo">🎯</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">AI Performance Coach</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">Replace dreaded annual reviews with continuous feedback. Generate agendas, PIPs, and recognition messages.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">AI Performance Coach</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">Replace dreaded annual reviews with continuous feedback loops. Generate high-impact agendas, PIPs, and recognition messages in seconds.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="flex flex-wrap gap-2 mb-8">
+              <div className="p-10">
+                <div className="flex flex-wrap gap-2.5 mb-10">
                   <button onClick={() => setPerfSubTab(1)} className={`chip ${perfSubTab === 1 ? 'active' : ''}`}>📋 Performance Review</button>
                   <button onClick={() => setPerfSubTab(2)} className={`chip ${perfSubTab === 2 ? 'active' : ''}`}>💬 1-on-1 Agenda</button>
                   <button onClick={() => setPerfSubTab(3)} className={`chip ${perfSubTab === 3 ? 'active' : ''}`}>⬆️ Improvement Plan</button>
@@ -506,15 +538,15 @@ export default function App() {
           {/* JOB DESCRIPTION */}
           {activeTab === 'jd' && (
             <motion.div key="jd" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#9B6DFF]/30 to-[#B18CFF]/20 border border-[#9B6DFF]/30 shrink-0">📝</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#9B6DFF]/30 to-[#B18CFF]/20 border border-[#9B6DFF]/30 shrink-0 shadow-indigo" style={{ '--shadow-indigo': '0 0 30px rgba(155, 109, 255, 0.25)' } as any}>📝</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">AI Job Description Builder</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">Write compelling, inclusive JDs that attract top talent and reflect your actual culture.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">AI Job Description Builder</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">Write compelling, inclusive JDs that attract top talent and reflect your actual culture. Impact-framed and optimized for conversion.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Job Title</label><input value={jdForm.title} onChange={e => setJdForm({...jdForm, title: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#9B6DFF]/50" placeholder="e.g. Senior Product Designer"/></div>
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Department</label><input value={jdForm.dept} onChange={e => setJdForm({...jdForm, dept: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#9B6DFF]/50" placeholder="e.g. Product & Design"/></div>
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Experience Level</label>
@@ -564,15 +596,15 @@ export default function App() {
           {/* PULSE SURVEY */}
           {activeTab === 'survey' && (
             <motion.div key="survey" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#0FD4B0]/30 to-[#22C55E]/20 border border-[#0FD4B0]/30 shrink-0">📡</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#0FD4B0]/30 to-[#22C55E]/20 border border-[#0FD4B0]/30 shrink-0 shadow-teal">📡</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">Employee Pulse Surveys</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">Build smart, targeted surveys and get AI to analyze results for actionable insights.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">Employee Pulse Surveys</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">Build smart, targeted surveys and get AI to analyze results for actionable insights. Listen to the heartbeat of your organization.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="flex flex-wrap gap-2 mb-8">
+              <div className="p-10">
+                <div className="flex flex-wrap gap-2.5 mb-10">
                   <button onClick={() => setSurveySubTab(1)} className={`chip ${surveySubTab === 1 ? 'active' : ''}`}>🔧 Build Survey</button>
                   <button onClick={() => setSurveySubTab(2)} className={`chip ${surveySubTab === 2 ? 'active' : ''}`}>📊 Analyze Results</button>
                 </div>
@@ -641,15 +673,15 @@ export default function App() {
           {/* CAREER GROWTH */}
           {activeTab === 'growth' && (
             <motion.div key="growth" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#FF6B6B]/30 to-[#FFB347]/20 border border-[#FF6B6B]/30 shrink-0">🌱</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#FF6B6B]/30 to-[#FFB347]/20 border border-[#FF6B6B]/30 shrink-0 shadow-coral">🌱</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">AI Career Growth Planner</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">Map clear growth paths, promotion readiness, and upskilling roadmaps to retain your best people.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">AI Career Growth Planner</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">Map clear growth paths, promotion readiness, and upskilling roadmaps to retain your best people. Invest in their future, secure yours.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="flex flex-wrap gap-2 mb-8">
+              <div className="p-10">
+                <div className="flex flex-wrap gap-2.5 mb-10">
                   <button onClick={() => setGrowthSubTab(1)} className={`chip ${growthSubTab === 1 ? 'active' : ''}`}>🗺️ Growth Plan</button>
                   <button onClick={() => setGrowthSubTab(2)} className={`chip ${growthSubTab === 2 ? 'active' : ''}`}>⬆️ Promotion Check</button>
                   <button onClick={() => setGrowthSubTab(3)} className={`chip ${growthSubTab === 3 ? 'active' : ''}`}>🎓 Upskilling</button>
@@ -727,17 +759,18 @@ export default function App() {
           {/* ONBOARDING */}
           {activeTab === 'onboard' && (
             <motion.div key="onboard" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#FF3CAC]/25 to-[#784BA0]/25 border border-[#FF3CAC]/25 shrink-0">🚀</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#FF3CAC]/25 to-[#784BA0]/25 border border-[#FF3CAC]/25 shrink-0 shadow-coral" style={{ '--shadow-coral': '0 0 30px rgba(255, 60, 172, 0.25)' } as any}>🚀</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">Generate 30-Day Onboarding Plan</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">AI builds a laser-focused, role-specific onboarding journey.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">AI Onboarding Planner</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">Build laser-focused, role-specific onboarding journeys that reduce time-to-productivity and boost long-term retention.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Employee Name</label><input value={onboardForm.name} onChange={e => setOnboardForm({...onboardForm, name: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FF3CAC]/50" placeholder="e.g. Sarah Johnson"/></div>
-                  <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Job Title</label><input value={onboardForm.role} onChange={e => setOnboardForm({...onboardForm, role: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FF3CAC]/50" placeholder="e.g. Senior Marketing Manager"/></div>
+                  <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Employee Email</label><input value={onboardForm.email} onChange={e => setOnboardForm({...onboardForm, email: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FF3CAC]/50" placeholder="e.g. sarah.j@company.com"/></div>
+                  <div className="flex flex-col gap-2 md:col-span-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Job Title</label><input value={onboardForm.role} onChange={e => setOnboardForm({...onboardForm, role: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FF3CAC]/50" placeholder="e.g. Senior Marketing Manager"/></div>
                   <div className="flex flex-col gap-2 md:col-span-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Key Goals</label><textarea value={onboardForm.goals} onChange={e => setOnboardForm({...onboardForm, goals: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FF3CAC]/50 min-h-[100px]" placeholder="e.g. Learn product, meet stakeholders..."/></div>
                 </div>
                 <div className="flex items-center gap-3 mt-8">
@@ -761,15 +794,15 @@ export default function App() {
           {/* EXIT INTELLIGENCE */}
           {activeTab === 'exit' && (
             <motion.div key="exit" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#2B86C5]/25 to-[#00F5D4]/25 border border-[#2B86C5]/25 shrink-0">🚪</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#2B86C5]/25 to-[#00F5D4]/25 border border-[#2B86C5]/25 shrink-0 shadow-indigo" style={{ '--shadow-indigo': '0 0 30px rgba(43, 134, 197, 0.25)' } as any}>🚪</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">Exit Intelligence</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">AI turns exit notes into a structured handover and risk signals.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">Exit Intelligence</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">AI turns exit notes into structured handovers and systemic risk signals. Protect institutional knowledge and learn from every departure.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Employee Name</label><input value={exitForm.name} onChange={e => setExitForm({...exitForm, name: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#2B86C5]/50" placeholder="e.g. Rahul Mehta"/></div>
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Role</label><input value={exitForm.role} onChange={e => setExitForm({...exitForm, role: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#2B86C5]/50" placeholder="e.g. Lead Developer"/></div>
                   <div className="flex flex-col gap-2 md:col-span-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Exit Notes</label><textarea value={exitForm.notes} onChange={e => setExitForm({...exitForm, notes: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#2B86C5]/50 min-h-[120px]" placeholder="Paste exit interview notes here..."/></div>
@@ -795,15 +828,15 @@ export default function App() {
           {/* RETENTION RISK */}
           {activeTab === 'risk' && (
             <motion.div key="risk" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="scard">
-              <div className="p-8 border-b border-white/8 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-linear-to-br from-[#FFE14D]/20 to-[#FF3CAC]/20 border border-[#FFE14D]/20 shrink-0">📊</div>
+              <div className="p-10 border-b border-white/8 flex items-start gap-6">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-linear-to-br from-[#FFE14D]/20 to-[#FF3CAC]/20 border border-[#FFE14D]/20 shrink-0 shadow-coral" style={{ '--shadow-coral': '0 0 30px rgba(255, 225, 77, 0.2)' } as any}>📊</div>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold mb-1">Retention Risk Score</h3>
-                  <p className="text-sm text-[#B4C4F0]/35 leading-relaxed">Predictive analysis to identify who might be at risk before they leave.</p>
+                  <h3 className="font-display text-2xl font-extrabold mb-2 text-[#F0F4FF]">Retention Risk Score</h3>
+                  <p className="text-base text-[#B4C4F0]/45 leading-relaxed max-w-2xl">Predictive analysis to identify who might be at risk before they leave. Turn subtle signals into proactive retention strategies.</p>
                 </div>
               </div>
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Employee Name</label><input value={riskForm.name} onChange={e => setRiskForm({...riskForm, name: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FFE14D]/50" placeholder="e.g. Priya Sharma"/></div>
                   <div className="flex flex-col gap-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Role</label><input value={riskForm.role} onChange={e => setRiskForm({...riskForm, role: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FFE14D]/50" placeholder="e.g. Account Manager"/></div>
                   <div className="flex flex-col gap-2 md:col-span-2"><label className="text-[11px] font-bold text-[#B4C4F0]/35 uppercase tracking-wider">Observations</label><textarea value={riskForm.obs} onChange={e => setRiskForm({...riskForm, obs: e.target.value})} className="bg-white/4 border border-white/8 rounded-xl px-4 py-3 text-sm text-white outline-hidden focus:border-[#FFE14D]/50 min-h-[100px]" placeholder="What have you noticed lately?..."/></div>
@@ -852,8 +885,9 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="bg-white/4 border border-white/8 rounded-2xl p-6 mt-6 backdrop-blur-xl">
-                      <p className="text-sm text-white/65 leading-relaxed italic">"{riskResult.summary}"</p>
+                    <div className="bg-white/4 border border-white/8 rounded-2xl p-6 mt-6 backdrop-blur-xl relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-[#00F5D4]/40" />
+                      <p className="text-sm text-white/65 leading-relaxed italic pl-4">"{riskResult.summary}"</p>
                     </div>
 
                     <div className="bg-[#00F5D4]/5 border border-[#00F5D4]/15 rounded-2xl p-6 mt-4">
@@ -863,6 +897,90 @@ export default function App() {
                   </motion.div>
                 )}
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* History Modal */}
+        <AnimatePresence>
+          {showHistory && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowHistory(false)}
+                className="absolute inset-0 bg-[#090D1A]/80 backdrop-blur-md"
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-2xl bg-[#141C35] border border-white/10 rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+              >
+                <div className="p-8 border-b border-white/8 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-display text-2xl font-extrabold text-[#F0F4FF]">Recent Intelligence</h3>
+                    <p className="text-sm text-[#B4C4F0]/45">Your last 10 AI-generated reports and plans.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {history.length > 0 && (
+                      <button 
+                        onClick={() => { setHistory([]); setToast({ show: true, msg: 'History cleared' }); setTimeout(() => setToast({ show: false, msg: '' }), 3000); }}
+                        className="text-[11px] font-bold uppercase tracking-wider text-[#FF6B6B] hover:text-[#FF8E8E] transition-colors"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                    <button onClick={() => setShowHistory(false)} className="w-10 h-10 rounded-full bg-white/4 border border-white/8 flex items-center justify-center text-[#B4C4F0]/45 hover:text-white transition-colors">
+                      <Plus className="rotate-45" size={20} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar">
+                  {history.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 rounded-2xl bg-white/4 border border-white/8 flex items-center justify-center text-2xl mx-auto mb-4 opacity-20">📜</div>
+                      <p className="text-[#B4C4F0]/35 font-medium">No history yet. Start generating!</p>
+                    </div>
+                  ) : (
+                    history.map((item, idx) => (
+                      <div key={idx} className="bg-white/4 border border-white/8 rounded-2xl p-5 hover:bg-white/6 transition-colors group">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#7B8BFF] bg-[#5B6CF9]/10 px-2 py-0.5 rounded-md mb-2 inline-block">{item.type}</span>
+                            <h4 className="font-display text-lg font-bold text-[#F0F4FF]">{item.title}</h4>
+                            <span className="text-[10px] text-[#B4C4F0]/35">{item.date}</span>
+                          </div>
+                          <button onClick={() => copyToClipboard(item.content)} className="p-2 rounded-lg bg-white/4 border border-white/8 text-[#B4C4F0]/45 hover:text-white hover:bg-[#5B6CF9]/20 transition-all">
+                            <Copy size={16} />
+                          </button>
+                        </div>
+                        <div className="text-xs text-[#B4C4F0]/60 line-clamp-3 font-light leading-relaxed">
+                          {item.content}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {toast.show && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.9 }}
+              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-[#1A2340] border border-white/15 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-2xl"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#0FD4B0]/20 flex items-center justify-center text-[#0FD4B0]">
+                <CheckCircle2 size={14} />
+              </div>
+              <span className="text-sm font-semibold text-[#F0F4FF]">{toast.msg}</span>
             </motion.div>
           )}
         </AnimatePresence>
