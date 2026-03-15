@@ -1,61 +1,137 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap');
 
 @theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", sans-serif;
   --font-syne: "Syne", sans-serif;
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
 
 @layer base {
   :root {
+    /* Brand palette */
+    --indigo: #5B6CF9;
+    --indigo-light: #7B8BFF;
+    --indigo-deep: #3D4FDB;
+    --teal: #0FD4B0;
+    --teal-light: #3EEECF;
+    --coral: #FF6B6B;
+    --coral-light: #FF8E8E;
+    --amber: #FFB347;
+    --green: #22C55E;
+    --purple: #9B6DFF;
+
+    /* Backgrounds — deep navy slate */
+    --bg: #090D1A;
+    --bg2: #0D1225;
+    --bg3: #111830;
+    --surface: #141C35;
+    --surface2: #1A2340;
+    --surface3: #1F2A4A;
+
+    /* Glass */
+    --glass: rgba(255, 255, 255, 0.04);
+    --glass2: rgba(255, 255, 255, 0.06);
+    --glass3: rgba(255, 255, 255, 0.09);
+
+    /* Borders */
+    --b1: rgba(255, 255, 255, 0.07);
+    --b2: rgba(255, 255, 255, 0.1);
+    --b3: rgba(255, 255, 255, 0.16);
+
+    /* Text */
+    --t1: #F0F4FF;
+    --t2: rgba(220, 228, 255, 0.7);
+    --t3: rgba(180, 196, 240, 0.45);
+
+    /* Radii */
+    --r: 12px;
+    --rl: 20px;
+    --rxl: 28px;
+
+    /* Shadows */
+    --shadow-indigo: 0 0 40px rgba(91, 108, 249, 0.25);
+    --shadow-teal: 0 0 30px rgba(15, 212, 176, 0.2);
+    --shadow-coral: 0 0 30px rgba(255, 107, 107, 0.25);
+
+    /* Legacy compatibility or specific overrides */
     --pink: #FF3CAC;
-    --purple: #784BA0;
+    /* --purple is already defined above */
     --blue: #2B86C5;
     --cyan: #00F5D4;
     --orange: #FF8C42;
-    --green: #00E676;
+    /* --green is already defined above */
     --yellow: #FFE14D;
     --dark: #08080f;
     --dark2: #0f0f1e;
     --dark3: #16162a;
-    --glass: rgba(255, 255, 255, 0.04);
-    --glass2: rgba(255, 255, 255, 0.07);
-    --glass3: rgba(255, 255, 255, 0.12);
     --border: rgba(255, 255, 255, 0.08);
     --borderl: rgba(255, 255, 255, 0.15);
     --text: #fff;
     --text2: rgba(255, 255, 255, 0.65);
     --text3: rgba(255, 255, 255, 0.35);
-    --r: 16px;
-    --rl: 24px;
   }
 
   body {
-    @apply bg-[#08080f] text-white font-jakarta antialiased overflow-x-hidden min-h-screen;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply bg-[#090D1A] text-[#F0F4FF] font-sans antialiased overflow-x-hidden min-h-screen;
+    font-family: 'Manrope', sans-serif;
   }
 }
 
 @layer components {
   .orb {
-    @apply fixed rounded-full blur-[90px] opacity-15 pointer-events-none z-0;
-    animation: orbFloat 9s ease-in-out infinite;
+    @apply fixed rounded-full blur-[120px] pointer-events-none z-0;
+    animation: orb-float 14s ease-in-out infinite;
   }
 
-  .orb1 {
-    @apply w-[700px] h-[700px] top-[-250px] left-[-200px];
-    background: radial-gradient(circle, var(--pink), var(--purple));
+  .orb-a {
+    @apply w-[700px] h-[700px] top-[-200px] left-[-200px];
+    background: rgba(91, 108, 249, 0.12);
   }
 
-  .orb2 {
-    @apply w-[550px] h-[550px] top-[25%] right-[-220px];
-    background: radial-gradient(circle, var(--blue), var(--cyan));
-    animation-delay: -3.5s;
-  }
-
-  .orb3 {
-    @apply w-[450px] h-[450px] bottom-[-150px] left-[25%];
-    background: radial-gradient(circle, var(--cyan), var(--yellow));
+  .orb-b {
+    @apply w-[600px] h-[600px] bottom-[-150px] right-[-150px];
+    background: rgba(15, 212, 176, 0.09);
     animation-delay: -7s;
+  }
+
+  .orb-c {
+    @apply w-[400px] h-[400px] top-[40%] left-[35%];
+    background: rgba(255, 107, 107, 0.07);
+    animation-delay: -4s;
+  }
+
+  @keyframes orb-float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -30px); }
+  }
+
+  .grid-bg {
+    @apply fixed inset-0 z-0 pointer-events-none;
+    background-image:
+      linear-gradient(rgba(91, 108, 249, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91, 108, 249, 0.03) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+
+  .noise {
+    @apply fixed inset-0 z-0 pointer-events-none opacity-[0.025];
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .ticker-track {
+    @apply flex w-max;
+    animation: scroll 30s linear infinite;
+  }
+
+  .ticker-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 
   .btn-glow {
@@ -141,11 +217,6 @@
   }
 }
 
-@keyframes orbFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-50px) scale(1.06); }
-}
-
 @keyframes lani {
   0% { transform: translateX(-200%); }
   100% { transform: translateX(400%); }
@@ -153,4 +224,12 @@
 
 .lbar {
   animation: lani 1.6s ease-in-out infinite;
+}
+
+.reveal {
+  @apply opacity-0 translate-y-[22px] transition-all duration-[650ms] ease-in-out;
+}
+
+.reveal.in {
+  @apply opacity-100 translate-y-0;
 }
