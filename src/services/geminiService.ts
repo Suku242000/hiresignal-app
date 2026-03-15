@@ -2,6 +2,25 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
+async function safeGenerateContent(prompt: string): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: [{ parts: [{ text: prompt }] }],
+    });
+    return response.text || "";
+  } catch (error: any) {
+    console.error("Gemini API Error:", error);
+    if (error.message?.includes("API key not valid") || error.message?.includes("API_KEY_INVALID")) {
+      throw new Error("Invalid or missing Gemini API key. Please check your configuration.");
+    }
+    if (error.message?.includes("quota")) {
+      throw new Error("API quota exceeded. Please try again later.");
+    }
+    throw new Error(error.message || "Failed to generate content. Please try again.");
+  }
+}
+
 export async function generateOnboardingPlan(data: {
   name: string;
   role: string;
@@ -42,12 +61,7 @@ SUCCESS SIGNALS
 
 Be specific to the role, practical, and warm in tone. Use clear formatting.`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-
-  return response.text;
+  return await safeGenerateContent(prompt);
 }
 
 export async function generateExitReport(data: {
@@ -86,12 +100,7 @@ What this departure reveals about the role, team, or company. Look for systemic 
 
 Be honest, practical, and direct. No fluff. This is a working document for leadership.`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-
-  return response.text;
+  return await safeGenerateContent(prompt);
 }
 
 export async function analyzeRetentionRisk(data: {
@@ -126,12 +135,7 @@ Paragraph 4: Top 3 specific interventions ranked by impact — what the manager 
 
 Be candid, specific, and actionable. This is for a manager who wants to act today.`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-
-  return response.text;
+  return await safeGenerateContent(prompt);
 }
 
 export async function generatePerformanceFeedback(type: number, data: any) {
@@ -190,11 +194,7 @@ Tone: ${data.tone}
 Write a specific, impact-focused, personal, and memorable recognition message. Include a "Science behind this" coaching tip for the manager.`;
   }
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-  return response.text;
+  return await safeGenerateContent(prompt);
 }
 
 export async function generateJobDescription(data: any) {
@@ -213,11 +213,7 @@ Sections to Include: ${data.sections}
 
 Write a complete, compelling job description with a hook, impact-framed responsibilities, and concise requirements.`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-  return response.text;
+  return await safeGenerateContent(prompt);
 }
 
 export async function generatePulseSurvey(type: number, data: any) {
@@ -242,11 +238,7 @@ Previous Survey: ${data.prev || 'No previous data'}
 Produce a Survey Intelligence Report with: Headline Finding, Score Summary, Red Flags, Positive Signals, Trend Analysis, Root Cause Hypotheses, and a 30-day Action Plan.`;
   }
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-  return response.text;
+  return await safeGenerateContent(prompt);
 }
 
 export async function generateCareerPlan(type: number, data: any) {
@@ -284,9 +276,5 @@ Time Available: ${data.time}
 Build a roadmap with: Skills Priority Matrix, 90-Day Sprint Plan, Curated Resources, Apply-as-you-learn projects, and 6-Month Milestones.`;
   }
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ parts: [{ text: prompt }] }],
-  });
-  return response.text;
+  return await safeGenerateContent(prompt);
 }

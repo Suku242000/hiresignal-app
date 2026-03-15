@@ -183,15 +183,19 @@ export default function App() {
   const [growthResult, setGrowthResult] = useState('');
 
   // UI States
-  const [toast, setToast] = useState<{ show: boolean, msg: string }>({ show: false, msg: '' });
+  const [toast, setToast] = useState<{ show: boolean, msg: string, type: 'success' | 'error' }>({ show: false, msg: '', type: 'success' });
 
   // Loading States
   const [loading, setLoading] = useState({ onboard: false, exit: false, risk: false, perf: false, jd: false, survey: false, growth: false });
 
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ show: true, msg, type });
+    setTimeout(() => setToast({ show: false, msg: '', type }), 4000);
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    setToast({ show: true, msg: 'Copied to clipboard!' });
-    setTimeout(() => setToast({ show: false, msg: '' }), 3000);
+    showToast('Copied to clipboard!', 'success');
   };
 
   const addToHistory = (type: string, title: string, content: string) => {
@@ -205,29 +209,47 @@ export default function App() {
   };
 
   const handleOnboard = async () => {
-    if (!onboardForm.name || !onboardForm.role || !onboardForm.email) return alert('Please enter name, role, and email');
+    if (!onboardForm.name || !onboardForm.role || !onboardForm.email) {
+      return showToast('Please enter name, role, and email', 'error');
+    }
     setLoading(prev => ({ ...prev, onboard: true }));
     try {
       const res = await generateOnboardingPlan(onboardForm);
       setOnboardResult(res);
       setStats(prev => ({ ...prev, hires: prev.hires + 1 }));
       addToHistory('Onboarding', `Plan for ${onboardForm.name}`, res);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, onboard: false })); }
+      showToast('Onboarding plan generated!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to generate onboarding plan', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, onboard: false }));
+    }
   };
 
   const handleExit = async () => {
-    if (!exitForm.name || !exitForm.role) return alert('Please enter name and role');
+    if (!exitForm.name || !exitForm.role) {
+      return showToast('Please enter name and role', 'error');
+    }
     setLoading(prev => ({ ...prev, exit: true }));
     try {
       const res = await generateExitReport(exitForm);
       setExitResult(res);
       setStats(prev => ({ ...prev, exits: prev.exits + 1 }));
       addToHistory('Exit Intelligence', `Report for ${exitForm.name}`, res);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, exit: false })); }
+      showToast('Exit report generated!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to generate exit report', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, exit: false }));
+    }
   };
 
   const handleRisk = async () => {
-    if (!riskForm.name || !riskForm.role) return alert('Please enter name and role');
+    if (!riskForm.name || !riskForm.role) {
+      return showToast('Please enter name and role', 'error');
+    }
     setLoading(prev => ({ ...prev, risk: true }));
     try {
       const res = await analyzeRetentionRisk(riskForm);
@@ -248,35 +270,71 @@ export default function App() {
       const avg = Math.round(newScores.reduce((a, b) => a + b.score, 0) / newScores.length);
       setStats(prev => ({ ...prev, avgRisk: `${avg}%` }));
       addToHistory('Retention Risk', `Analysis for ${riskForm.name}`, full);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, risk: false })); }
+      showToast('Risk analysis complete!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to analyze retention risk', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, risk: false }));
+    }
   };
 
   const handlePerf = async () => {
+    let data;
+    let title = "";
+    if (perfSubTab === 1) {
+      if (!perfForm.name || !perfForm.role) return showToast('Please enter name and role', 'error');
+      data = perfForm; title = `Review for ${perfForm.name}`;
+    } else if (perfSubTab === 2) {
+      if (!ooForm.mgr || !ooForm.emp) return showToast('Please enter manager and employee names', 'error');
+      data = ooForm; title = `1-on-1: ${ooForm.mgr} & ${ooForm.emp}`;
+    } else if (perfSubTab === 3) {
+      if (!pipForm.name || !pipForm.role) return showToast('Please enter name and role', 'error');
+      data = pipForm; title = `PIP for ${pipForm.name}`;
+    } else {
+      if (!recForm.name || !recForm.what) return showToast('Please enter name and achievement', 'error');
+      data = recForm; title = `Recognition for ${recForm.name}`;
+    }
+
     setLoading(prev => ({ ...prev, perf: true }));
     try {
-      let data;
-      let title = "";
-      if (perfSubTab === 1) { data = perfForm; title = `Review for ${perfForm.name}`; }
-      else if (perfSubTab === 2) { data = ooForm; title = `1-on-1: ${ooForm.mgr} & ${ooForm.emp}`; }
-      else if (perfSubTab === 3) { data = pipForm; title = `PIP for ${pipForm.name}`; }
-      else { data = recForm; title = `Recognition for ${recForm.name}`; }
       const res = await generatePerformanceFeedback(perfSubTab, data);
       setPerfResult(res);
       addToHistory('Performance', title, res);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, perf: false })); }
+      showToast('Feedback generated!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to generate feedback', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, perf: false }));
+    }
   };
 
   const handleJD = async () => {
-    if (!jdForm.title) return alert('Please enter a job title');
+    if (!jdForm.title || !jdForm.dept) {
+      return showToast('Please enter job title and department', 'error');
+    }
     setLoading(prev => ({ ...prev, jd: true }));
     try {
       const res = await generateJobDescription(jdForm);
       setJdResult(res);
       addToHistory('Job Description', jdForm.title, res);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, jd: false })); }
+      showToast('Job description generated!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to generate job description', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, jd: false }));
+    }
   };
 
   const handleSurvey = async () => {
+    if (surveySubTab === 1 && !svForm.team) {
+      return showToast('Please enter a team or department', 'error');
+    }
+    if (surveySubTab === 2 && (!saForm.team || !saForm.results)) {
+      return showToast('Please enter team and survey results', 'error');
+    }
     setLoading(prev => ({ ...prev, survey: true }));
     try {
       const data = surveySubTab === 1 ? svForm : saForm;
@@ -284,21 +342,41 @@ export default function App() {
       const res = await generatePulseSurvey(surveySubTab, data);
       setSurveyResult(res);
       addToHistory('Pulse Survey', title, res);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, survey: false })); }
+      showToast(surveySubTab === 1 ? 'Survey generated!' : 'Results analyzed!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to process survey request', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, survey: false }));
+    }
   };
 
   const handleGrowth = async () => {
+    let data;
+    let title = "";
+    if (growthSubTab === 1) {
+      if (!gpForm.name || !gpForm.target) return showToast('Please enter name and target role', 'error');
+      data = gpForm; title = `Growth Plan: ${gpForm.name}`;
+    } else if (growthSubTab === 2) {
+      if (!prForm.name || !prForm.target) return showToast('Please enter name and target promotion', 'error');
+      data = prForm; title = `Promotion: ${prForm.name}`;
+    } else {
+      if (!upForm.name || !upForm.skills) return showToast('Please enter name and skills to build', 'error');
+      data = upForm; title = `Upskilling: ${upForm.name}`;
+    }
+
     setLoading(prev => ({ ...prev, growth: true }));
     try {
-      let data;
-      let title = "";
-      if (growthSubTab === 1) { data = gpForm; title = `Growth Plan: ${gpForm.name}`; }
-      else if (growthSubTab === 2) { data = prForm; title = `Promotion: ${prForm.name}`; }
-      else { data = upForm; title = `Upskilling: ${upForm.name}`; }
       const res = await generateCareerPlan(growthSubTab, data);
       setGrowthResult(res);
       addToHistory('Career Growth', title, res);
-    } catch (e) { console.error(e); } finally { setLoading(prev => ({ ...prev, growth: false })); }
+      showToast('Career plan generated!', 'success');
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || 'Failed to generate career plan', 'error');
+    } finally {
+      setLoading(prev => ({ ...prev, growth: false }));
+    }
   };
 
   const toggleJdSection = (section: string) => {
@@ -975,10 +1053,14 @@ export default function App() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.9 }}
-              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-[#1A2340] border border-white/15 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-2xl"
+              className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-[#1A2340] border px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-2xl ${
+                toast.type === 'error' ? 'border-[#FF6B6B]/30' : 'border-white/15'
+              }`}
             >
-              <div className="w-6 h-6 rounded-full bg-[#0FD4B0]/20 flex items-center justify-center text-[#0FD4B0]">
-                <CheckCircle2 size={14} />
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                toast.type === 'error' ? 'bg-[#FF6B6B]/20 text-[#FF6B6B]' : 'bg-[#0FD4B0]/20 text-[#0FD4B0]'
+              }`}>
+                {toast.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
               </div>
               <span className="text-sm font-semibold text-[#F0F4FF]">{toast.msg}</span>
             </motion.div>

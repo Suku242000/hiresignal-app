@@ -34,12 +34,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
           contents: [{ parts: [{ text: 'Reply with one word: OK' }] }], 
           generationConfig: { maxOutputTokens: 5 } 
         };
-      } else {
+      } else if (testForm.provider === 'anthropic') {
         payload = { 
           model: 'claude-3-5-sonnet-20240620', 
           max_tokens: 5, 
           messages: [{ role: 'user', content: 'Reply with one word: OK' }] 
         };
+      } else {
+        payload = { prompt: 'Reply with one word: OK' };
       }
 
       const res = await fetch(testForm.proxy, {
@@ -282,6 +284,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><FileText size={13} className="text-[#22C55E]" /> Job Description Builder</span>
                 <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><Radio size={13} className="text-[#9B6DFF]" /> Employee Pulse Surveys</span>
                 <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><Sprout size={13} className="text-[#5B6CF9]" /> Career Growth Planner</span>
+                <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><Users size={13} className="text-[#0FD4B0]" /> 1-on-1 Agenda Generator</span>
+                <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><TrendingUp size={13} className="text-[#FF6B6B]" /> Promotion Readiness Check</span>
+                <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><Zap size={13} className="text-[#FFB347]" /> Upskilling Roadmaps</span>
+                <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><Activity size={13} className="text-[#22C55E]" /> Recognition Message Writer</span>
+                <span className="flex items-center gap-2 px-9 text-xs font-medium text-[#B4C4F0]/45 whitespace-nowrap"><UserMinus size={13} className="text-[#9B6DFF]" /> PIP Document Creator</span>
               </React.Fragment>
             ))}
           </div>
@@ -536,6 +543,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                     >
                       <option value="gemini">Gemini (Google AI Studio)</option>
                       <option value="anthropic">Claude (Anthropic)</option>
+                      <option value="groq">Groq (Free, Fastest)</option>
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#B4C4F0]/45">
                       <ChevronDown size={14} />
@@ -606,6 +614,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-[#0FD4B0]" /> Completely free</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-[#0FD4B0]" /> Open source (MIT)</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-[#0FD4B0]" /> No sign-up required</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-[#0FD4B0]" /> Works with Gemini, Claude & Groq</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-[#0FD4B0]" /> Deploy anywhere</span>
           </div>
         </div>
 
