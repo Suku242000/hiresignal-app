@@ -66,12 +66,12 @@ const Background = () => {
     const pos = new Float32Array(N * 3);
     const col = new Float32Array(N * 3);
     const pal = [
-      new THREE.Color('#5B6CF9'),
-      new THREE.Color('#0FD4B0'),
-      new THREE.Color('#FF6B6B'),
-      new THREE.Color('#9B6DFF'),
-      new THREE.Color('#22C55E'),
-      new THREE.Color('#FFB347')
+      new THREE.Color('#5B6CF9'), // indigo
+      new THREE.Color('#7B8BFF'), // indigo light
+      new THREE.Color('#0FD4B0'), // teal
+      new THREE.Color('#9B6DFF'), // purple
+      new THREE.Color('#22C55E'), // green
+      new THREE.Color('#1A2340'), // dark
     ];
 
     for (let i = 0; i < N; i++) {
@@ -138,7 +138,8 @@ const Background = () => {
 // --- Main App Component ---
 export default function App() {
   const [view, setView] = useState<'landing' | 'dashboard'>('landing');
-  const [activeTab, setActiveTab] = useState<'onboard' | 'exit' | 'risk' | 'perf' | 'jd' | 'survey' | 'growth'>('perf');
+  const [mode, setMode] = useState<'core' | 'expansion'>('core');
+  const [activeTab, setActiveTab] = useState<'onboard' | 'exit' | 'risk' | 'perf' | 'jd' | 'survey' | 'growth'>('onboard');
   const [stats, setStats] = useState({ hires: 12, exits: 3, avgRisk: '24%' });
   const [riskScores, setRiskScores] = useState<any[]>([
     { name: 'Jan', score: 20 },
@@ -397,9 +398,20 @@ export default function App() {
     }));
   };
 
+  const handleLaunch = (m: 'core' | 'expansion') => {
+    setMode(m);
+    setView('dashboard');
+    if (m === 'core') setActiveTab('onboard');
+    else setActiveTab('perf');
+  };
+
   if (view === 'landing') {
-    return <LandingPage onLaunch={() => setView('dashboard')} />;
+    return <LandingPage onLaunch={handleLaunch} />;
   }
+
+  const coreTools = ['onboard', 'exit', 'risk'];
+  const expansionTools = ['perf', 'jd', 'survey', 'growth'];
+  const currentTools = mode === 'core' ? coreTools : expansionTools;
 
   return (
     <div className="relative min-h-screen bg-[#090D1A] text-[#F0F4FF] overflow-x-hidden">
@@ -407,15 +419,21 @@ export default function App() {
       
       <div className="relative z-10 max-w-[1100px] mx-auto px-6 pb-24">
         {/* Navigation */}
-        <nav className="flex items-center justify-between py-7 mb-24">
+        <nav className="flex items-center justify-between py-7 mb-24 sticky top-0 z-[200] bg-[#0D1225]/85 backdrop-blur-3xl border-b border-[var(--border)]">
           <div className="font-display text-2xl font-extrabold bg-linear-to-br from-[#7B8BFF] via-[#9B6DFF] to-[#0FD4B0] bg-clip-text text-transparent tracking-tight cursor-pointer" onClick={() => setView('landing')}>
             HireSignal
             <span className="block text-[13px] font-medium text-[#B4C4F0]/45 tracking-normal mt-[-2px]">HR Intelligence Platform</span>
           </div>
           <div className="flex items-center gap-2.5">
             <button className="hidden sm:block px-5 py-2 rounded-lg text-[13px] font-semibold bg-white/6 border border-white/10 text-[#DCE4FF]/70 hover:bg-white/9 hover:text-[#F0F4FF] transition-all" onClick={() => setShowHistory(true)}>History</button>
+            <button 
+              className="hidden sm:block px-5 py-2 rounded-lg text-[13px] font-semibold bg-white/6 border border-white/10 text-[#DCE4FF]/70 hover:bg-white/9 hover:text-[#F0F4FF] transition-all"
+              onClick={() => handleLaunch(mode === 'core' ? 'expansion' : 'core')}
+            >
+              Switch to {mode === 'core' ? 'Expansion' : 'Core'}
+            </button>
             <div className="bg-white/4 border border-white/8 rounded-full px-4 py-1.5 text-xs text-[#B4C4F0]/45 backdrop-blur-xl flex items-center gap-2">
-              Expansion Pack Active &middot; <span className="text-[#0FD4B0] font-semibold">Gemini 2.0 Flash</span>
+              {mode === 'core' ? 'Core App Active' : 'Expansion Pack Active'} &middot; <span className="text-[#0FD4B0] font-semibold">Gemini 2.0 Flash</span>
             </div>
           </div>
         </nav>
@@ -424,15 +442,27 @@ export default function App() {
         <div className="text-center mb-20">
           <div className="inline-flex items-center gap-2 bg-white/4 border border-white/10 rounded-full px-5 py-2 text-xs text-[#B4C4F0]/45 mb-8 backdrop-blur-xl">
             <span className="w-1.5 h-1.5 rounded-full bg-[#5B6CF9] animate-pulse" />
-            Research-backed · Built for what HR needs most in 2026
+            {mode === 'core' ? 'Core HR Intelligence · Research-backed' : 'Advanced Modules · Built for what HR needs most in 2026'}
           </div>
           <h1 className="font-display text-4xl md:text-7xl font-extrabold leading-[1.04] tracking-[-2.5px] mb-6">
-            Four tools that solve<br />
-            <span className="bg-linear-to-br from-[#7B8BFF] via-[#9B6DFF] to-[#5B6CF9] bg-clip-text text-transparent">HR's biggest gaps</span><br />
-            <span className="bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent">right now</span>
+            {mode === 'core' ? (
+              <>
+                The foundation of<br />
+                <span className="bg-linear-to-br from-[#7B8BFF] via-[#9B6DFF] to-[#5B6CF9] bg-clip-text text-transparent">modern employee</span><br />
+                <span className="bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent">intelligence</span>
+              </>
+            ) : (
+              <>
+                Four tools that solve<br />
+                <span className="bg-linear-to-br from-[#7B8BFF] via-[#9B6DFF] to-[#5B6CF9] bg-clip-text text-transparent">HR's biggest gaps</span><br />
+                <span className="bg-linear-to-br from-[#0FD4B0] to-[#22C55E] bg-clip-text text-transparent">right now</span>
+              </>
+            )}
           </h1>
           <p className="text-lg text-[#DCE4FF]/70 max-w-[560px] mx-auto mb-11 leading-relaxed font-light">
-            Performance coaching, job descriptions, pulse surveys, and career growth planning — the features 98% of HR teams say they desperately need.
+            {mode === 'core' 
+              ? 'Onboarding, exit intelligence, and retention risk — the core pillars of a healthy organization, powered by AI.'
+              : 'Performance coaching, job descriptions, pulse surveys, and career growth planning — the features 98% of HR teams say they desperately need.'}
           </p>
         </div>
 
@@ -481,35 +511,49 @@ export default function App() {
         </div>
 
         {/* Module Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-12">
-          <button onClick={() => setActiveTab('perf')} className={`mcard m1 ${activeTab === 'perf' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">🎯</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Performance</div>
-          </button>
-          <button onClick={() => setActiveTab('jd')} className={`mcard m2 ${activeTab === 'jd' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">📝</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Job Desc</div>
-          </button>
-          <button onClick={() => setActiveTab('survey')} className={`mcard m3 ${activeTab === 'survey' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">📡</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Surveys</div>
-          </button>
-          <button onClick={() => setActiveTab('growth')} className={`mcard m4 ${activeTab === 'growth' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">🌱</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Growth</div>
-          </button>
-          <button onClick={() => setActiveTab('onboard')} className={`mcard m5 ${activeTab === 'onboard' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">🚀</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Onboard</div>
-          </button>
-          <button onClick={() => setActiveTab('exit')} className={`mcard m6 ${activeTab === 'exit' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">🚪</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Exits</div>
-          </button>
-          <button onClick={() => setActiveTab('risk')} className={`mcard m7 ${activeTab === 'risk' ? 'active' : ''}`}>
-            <span className="text-2xl mb-2 block relative z-10">📊</span>
-            <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Risk</div>
-          </button>
+        <div className={`grid grid-cols-2 ${mode === 'core' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-3 mb-12 max-w-4xl mx-auto`}>
+          {currentTools.includes('onboard') && (
+            <button onClick={() => setActiveTab('onboard')} className={`mcard m5 ${activeTab === 'onboard' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">🚀</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Onboard</div>
+            </button>
+          )}
+          {currentTools.includes('exit') && (
+            <button onClick={() => setActiveTab('exit')} className={`mcard m6 ${activeTab === 'exit' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">🚪</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Exits</div>
+            </button>
+          )}
+          {currentTools.includes('risk') && (
+            <button onClick={() => setActiveTab('risk')} className={`mcard m7 ${activeTab === 'risk' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">📊</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Risk</div>
+            </button>
+          )}
+          {currentTools.includes('perf') && (
+            <button onClick={() => setActiveTab('perf')} className={`mcard m1 ${activeTab === 'perf' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">🎯</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Performance</div>
+            </button>
+          )}
+          {currentTools.includes('jd') && (
+            <button onClick={() => setActiveTab('jd')} className={`mcard m2 ${activeTab === 'jd' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">📝</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Job Desc</div>
+            </button>
+          )}
+          {currentTools.includes('survey') && (
+            <button onClick={() => setActiveTab('survey')} className={`mcard m3 ${activeTab === 'survey' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">📡</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Surveys</div>
+            </button>
+          )}
+          {currentTools.includes('growth') && (
+            <button onClick={() => setActiveTab('growth')} className={`mcard m4 ${activeTab === 'growth' ? 'active' : ''}`}>
+              <span className="text-2xl mb-2 block relative z-10">🌱</span>
+              <div className="font-display text-[12px] font-bold relative z-10 leading-tight">Growth</div>
+            </button>
+          )}
         </div>
 
         <AnimatePresence mode="wait">

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireSignal Core — AI HR Intelligence</title>
+  <style>
+    :root {
+      --bg: #090D1A;
+      --surface: #141C35;
+      --primary: #5B6CF9;
+      --accent: #0FD4B0;
+      --cta: #FF6B6B;
+      --text: #F0F4FF;
+      --text-dim: rgba(240, 244, 255, 0.7);
+      --border: rgba(255, 255, 255, 0.07);
+      --radius-card: 18px;
+      --radius-btn: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-bottom: 40px; border-bottom: 1px solid var(--border); }
+    .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #7B8BFF, #0FD4B0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    
+    .grid { display: grid; grid-template-columns: 300px 1fr; gap: 32px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .tool-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); padding: 16px; border-radius: 12px; text-align: left; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .tool-btn:hover { border-color: var(--primary); color: var(--text); }
+    .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .main-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 40px; min-height: 600px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; background: #0D1225; border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: white; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: var(--primary); }
+
+    .btn { padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; justify-content: center; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-area { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border); display: none; }
+    .result-content { background: #0D1225; border: 1px solid var(--border); border-radius: 12px; padding: 24px; font-size: 14px; white-space: pre-wrap; color: var(--text); }
+
+    .config-bar { background: rgba(91, 108, 249, 0.05); border: 1px solid var(--border); padding: 12px 20px; border-radius: 100px; display: flex; gap: 20px; margin-bottom: 32px; font-size: 12px; align-items: center; }
+    .config-status { color: var(--accent); font-weight: 700; }
+    
+    .loading-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.1); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html" class="logo">HireSignal Core</a>
+      <div style="display: flex; gap: 20px;">
+        <a href="index.html" style="color: var(--text-dim); text-decoration: none; font-size: 14px;">Home</a>
+        <a href="hiresignal-expansion-FIXED.html" style="color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 700;">Expansion Pack →</a>
+      </div>
+    </nav>
+
+    <div class="config-bar" id="configBar">
+      <span>⚙️ Config: <span id="configText" class="config-status">Not Connected</span></span>
+      <a href="index.html#setup" style="color: var(--primary); text-decoration: none;">Change Settings</a>
+    </div>
+
+    <div class="grid">
+      <div class="sidebar">
+        <button class="tool-btn active" onclick="showTool('onboarding')">🚀 New Hire Onboarding</button>
+        <button class="tool-btn" onclick="showTool('exit')">🚪 Exit Intelligence</button>
+        <button class="tool-btn" onclick="showTool('retention')">📊 Retention Risk Score</button>
+      </div>
+
+      <div class="main-card">
+        <!-- Onboarding Tool -->
+        <div id="tool-onboarding" class="tool-ui">
+          <h2 style="margin-bottom: 8px;">New Hire Onboarding</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Generate a personalized 30-day onboarding plan for any role.</p>
+          
+          <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="ob-name" placeholder="e.g. Sarah Chen">
+          </div>
+          <div class="form-group">
+            <label>Role & Department</label>
+            <input type="text" id="ob-role" placeholder="e.g. Senior Product Designer — Growth">
+          </div>
+          <div class="form-group">
+            <label>Key Goals (First 30 Days)</label>
+            <textarea id="ob-goals" rows="3" placeholder="What should they achieve? e.g. Complete first sprint, audit design system..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="btn-ob" onclick="runOnboarding()">
+            <span class="loading-spinner" id="spin-ob"></span>
+            <span>Generate 30-Day Plan</span>
+          </button>
+        </div>
+
+        <!-- Exit Tool -->
+        <div id="tool-exit" class="tool-ui" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Exit Intelligence</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Convert exit interview notes into a structured intelligence report.</p>
+          
+          <div class="form-group">
+            <label>Departing Employee</label>
+            <input type="text" id="ex-name" placeholder="e.g. Marcus Aurelius">
+          </div>
+          <div class="form-group">
+            <label>Reason for Leaving</label>
+            <select id="ex-reason">
+              <option value="Better Opportunity">Better Opportunity / Salary</option>
+              <option value="Career Change">Career Change</option>
+              <option value="Management/Culture">Management / Culture Issues</option>
+              <option value="Personal Reasons">Personal Reasons</option>
+              <option value="Relocation">Relocation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Exit Interview Notes</label>
+            <textarea id="ex-notes" rows="4" placeholder="Paste raw notes or bullet points from the exit interview..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="btn-ex" onclick="runExit()">
+            <span class="loading-spinner" id="spin-ex"></span>
+            <span>Generate Exit Report</span>
+          </button>
+        </div>
+
+        <!-- Retention Tool -->
+        <div id="tool-retention" class="tool-ui" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Retention Risk Score</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Predict turnover risk and get an immediate intervention plan.</p>
+          
+          <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="rt-name" placeholder="e.g. James Wilson">
+          </div>
+          <div class="form-group">
+            <label>Performance Context</label>
+            <select id="rt-perf">
+              <option value="Exceeding Expectations">Exceeding Expectations (High Performer)</option>
+              <option value="Meeting Expectations">Meeting Expectations</option>
+              <option value="Needs Improvement">Needs Improvement</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Recent Observations</label>
+            <textarea id="rt-obs" rows="4" placeholder="e.g. Less active in meetings, missed 2 deadlines, expressed frustration with project X..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="btn-rt" onclick="runRetention()">
+            <span class="loading-spinner" id="spin-rt"></span>
+            <span>Calculate Risk Score</span>
+          </button>
+        </div>
+
+        <div id="resultArea" class="result-area">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 id="resultTitle">AI Analysis</h3>
+            <button onclick="copyResult()" style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 700; cursor: pointer;">📋 Copy Text</button>
+          </div>
+          <div id="resultContent" class="result-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentConfig = null;
+
+    window.onload = () => {
+      const saved = localStorage.getItem('hiresignal_ai_config');
+      if (saved) {
+        currentConfig = JSON.parse(saved);
+        document.getElementById('configText').innerText = "Connected (" + currentConfig.provider + ")";
+      } else {
+        document.getElementById('configText').innerText = "Not Connected";
+        document.getElementById('configText').style.color = "var(--cta)";
+      }
+    };
+
+    function showTool(toolId) {
+      document.querySelectorAll('.tool-ui').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tool-' + toolId).style.display = 'block';
+      event.currentTarget.classList.add('active');
+      document.getElementById('resultArea').style.display = 'none';
+    }
+
+    async function callAI(prompt) {
+      if (!currentConfig) {
+        alert("Please connect your AI API key and Proxy URL on the homepage first.");
+        window.location.href = "index.html#setup";
+        return;
+      }
+
+      const { provider, key, proxy } = currentConfig;
+      let payload;
+
+      if (provider === 'gemini') {
+        payload = { contents: [{ parts: [{ text: prompt }] }] };
+      } else if (provider === 'anthropic') {
+        payload = { model: 'claude-3-5-sonnet-20240620', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] };
+      } else {
+        payload = { model: 'llama3-8b-8192', messages: [{ role: 'user', content: prompt }] };
+      }
+
+      const res = await fetch(proxy, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, apiKey: key, payload })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      if (provider === 'gemini') return data.candidates[0].content.parts[0].text;
+      if (provider === 'anthropic') return data.content[0].text;
+      return data.choices[0].message.content;
+    }
+
+    async function runOnboarding() {
+      const name = document.getElementById('ob-name').value;
+      const role = document.getElementById('ob-role').value;
+      const goals = document.getElementById('ob-goals').value;
+
+      if (!name || !role) return alert("Please fill in name and role.");
+
+      const btn = document.getElementById('btn-ob');
+      const spin = document.getElementById('spin-ob');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `Create a 30-day onboarding plan for ${name} in the role of ${role}. Goals: ${goals}. Include Week 1, 2, 3, 4 and Success Signals.`;
+        const result = await callAI(prompt);
+        displayResult("Onboarding Plan: " + name, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    async function runExit() {
+      const name = document.getElementById('ex-name').value;
+      const reason = document.getElementById('ex-reason').value;
+      const notes = document.getElementById('ex-notes').value;
+
+      if (!name || !notes) return alert("Please fill in name and notes.");
+
+      const btn = document.getElementById('btn-ex');
+      const spin = document.getElementById('spin-ex');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `Generate an Exit Intelligence Report for ${name}. Reason: ${reason}. Notes: ${notes}. Include Knowledge Transfer, Risk Analysis, and Backfill Guidance.`;
+        const result = await callAI(prompt);
+        displayResult("Exit Report: " + name, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    async function runRetention() {
+      const name = document.getElementById('rt-name').value;
+      const perf = document.getElementById('rt-perf').value;
+      const obs = document.getElementById('rt-obs').value;
+
+      if (!name || !obs) return alert("Please fill in name and observations.");
+
+      const btn = document.getElementById('btn-rt');
+      const spin = document.getElementById('spin-rt');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `Analyze retention risk for ${name}. Performance: ${perf}. Observations: ${obs}. Provide a RISK_SCORE (0-100), RISK_LEVEL, and an Intervention Plan.`;
+        const result = await callAI(prompt);
+        displayResult("Retention Risk: " + name, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    function displayResult(title, content) {
+      document.getElementById('resultTitle').innerText = title;
+      document.getElementById('resultContent').innerText = content;
+      document.getElementById('resultArea').style.display = 'block';
+      document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyResult() {
+      const text = document.getElementById('resultContent').innerText;
+      navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+    }
+  </script>
+</body>
+</html>

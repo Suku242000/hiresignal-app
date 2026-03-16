@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { ArrowRight, Rocket, Zap, Brain, Target, FileText, Radio, Sprout, Search, Plus, TrendingUp, Users, UserMinus, Activity, CheckCircle2, DoorOpen, BarChart3, ChevronDown } from 'lucide-react';
 
 interface LandingPageProps {
-  onLaunch: () => void;
+  onLaunch: (mode: 'core' | 'expansion') => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
@@ -215,7 +215,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
 
       <div className="relative z-10 max-w-[1160px] mx-auto px-8 pb-16">
         {/* Nav */}
-        <nav className="flex items-center justify-between py-5.5 sticky top-0 z-[200] bg-[#090D1A]/85 backdrop-blur-3xl border-b border-white/6 mb-0">
+        <nav className="flex items-center justify-between py-5.5 sticky top-0 z-[200] bg-[#0D1225] backdrop-blur-3xl border-b border-[var(--border)] mb-0">
           <div className="font-display text-[21px] font-extrabold bg-linear-to-br from-[#7B8BFF] to-[#0FD4B0] bg-clip-text text-transparent tracking-tight cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             HireSignal
           </div>
@@ -225,8 +225,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             <button className="px-4 py-1.5 rounded-lg text-[13px] font-medium text-[#B4C4F0]/45 hover:text-[#F0F4FF] hover:bg-white/6 transition-all" onClick={() => scrollToSection('setup-sec')}>Setup</button>
           </div>
           <div className="flex items-center gap-2.5">
-            <button className="hidden sm:block px-5 py-2 rounded-lg text-[13px] font-semibold bg-white/6 border border-white/10 text-[#DCE4FF]/70 hover:bg-white/9 hover:text-[#F0F4FF] transition-all" onClick={onLaunch}>Dashboard</button>
-            <button className="px-5 py-2 rounded-lg text-[13px] font-semibold bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] text-white shadow-[0_0_40px_rgba(91,108,249,0.25)] hover:shadow-[0_0_50px_rgba(91,108,249,0.4)] hover:-translate-y-px transition-all" onClick={onLaunch}>Launch App →</button>
+            <button className="hidden sm:block px-5 py-2 rounded-lg text-[13px] font-semibold bg-white/6 border border-white/10 text-[#DCE4FF]/70 hover:bg-white/9 hover:text-[#F0F4FF] transition-all" onClick={() => onLaunch('core')}>Dashboard</button>
+            <button className="px-5 py-2 rounded-lg text-[13px] font-semibold bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] text-white shadow-[0_0_40px_rgba(91,108,249,0.25)] hover:shadow-[0_0_50px_rgba(91,108,249,0.4)] hover:-translate-y-px transition-all" onClick={() => onLaunch('core')}>Launch App →</button>
           </div>
         </nav>
 
@@ -268,10 +268,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             transition={{ delay: 0.3 }}
             className="flex gap-3 justify-center flex-wrap"
           >
-            <button onClick={onLaunch} className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] text-white font-semibold text-sm shadow-[0_0_40px_rgba(91,108,249,0.25)] hover:shadow-[0_0_60px_rgba(91,108,249,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all">
+            <button onClick={() => onLaunch('core')} className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] text-white font-semibold text-sm shadow-[0_0_40px_rgba(91,108,249,0.25)] hover:shadow-[0_0_60px_rgba(91,108,249,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all">
               🚀 Launch Core App
             </button>
-            <button onClick={onLaunch} className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-linear-to-br from-[#FF6B6B] to-[#e85555] text-white font-semibold text-sm shadow-[0_0_30px_rgba(255,107,107,0.25)] hover:shadow-[0_0_50px_rgba(255,107,107,0.45)] hover:-translate-y-0.5 active:scale-95 transition-all">
+            <button onClick={() => onLaunch('expansion')} className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-linear-to-br from-[#FF6B6B] to-[#e85555] text-white font-semibold text-sm shadow-[0_0_30px_rgba(255,107,107,0.25)] hover:shadow-[0_0_50px_rgba(255,107,107,0.45)] hover:-translate-y-0.5 active:scale-95 transition-all">
               🧠 Expansion Pack
             </button>
             <button onClick={() => scrollToSection('setup-sec')} className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white/6 border border-white/10 text-[#F0F4FF] font-semibold text-sm backdrop-blur-xl hover:bg-white/9 hover:border-white/15 transition-all">
@@ -541,7 +541,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
                 <div key={step.n} className={`flex gap-4.5 py-5 border-b border-white/6 cursor-pointer group transition-all ${activeStep === step.n ? 'active-step' : ''}`} onClick={() => setActiveStep(step.n)}>
                   <div className={`w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center font-display text-sm font-extrabold bg-[#111830] border border-white/10 text-[#B4C4F0]/45 transition-all group-hover:bg-linear-to-br group-hover:from-[#5B6CF9] group-hover:to-[#3D4FDB] group-hover:border-transparent group-hover:text-white group-hover:shadow-[0_0_40px_rgba(91,108,249,0.25)] ${activeStep === step.n ? 'bg-linear-to-br from-[#5B6CF9] to-[#3D4FDB] border-transparent text-white shadow-[0_0_40px_rgba(91,108,249,0.25)]' : ''}`}>{step.n}</div>
                   <div className="flex-1">
-                    <h4 className={`text-sm font-bold mb-1 transition-colors group-hover:text-[#7B8BFF] ${activeStep === step.n ? 'text-[#7B8BFF]' : ''}`}>{step.h}</h4>
+                    <h4 className={`font-display text-sm font-bold mb-1 transition-colors group-hover:text-[#7B8BFF] ${activeStep === step.n ? 'text-[#7B8BFF]' : ''}`}>{step.h}</h4>
                     <p className="text-xs text-[#B4C4F0]/45 leading-[1.6]">{step.p}</p>
                   </div>
                 </div>
@@ -649,7 +649,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             </div>
           </div>
           <div>
-            <h5 className="text-[11px] font-bold uppercase tracking-wider text-[#B4C4F0]/45 mb-4">Core Tools</h5>
+            <h5 className="font-display text-[11px] font-bold uppercase tracking-wider text-[#B4C4F0]/45 mb-4">Core Tools</h5>
             <div className="flex flex-col gap-2.5">
               <button className="text-left text-[13px] text-[#DCE4FF]/70 hover:text-[#0FD4B0] transition-colors" onClick={onLaunch}>Onboarding Planner</button>
               <button className="text-left text-[13px] text-[#DCE4FF]/70 hover:text-[#0FD4B0] transition-colors" onClick={onLaunch}>Exit Intelligence</button>
@@ -657,7 +657,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLaunch }) => {
             </div>
           </div>
           <div>
-            <h5 className="text-[11px] font-bold uppercase tracking-wider text-[#B4C4F0]/45 mb-4">Expansion</h5>
+            <h5 className="font-display text-[11px] font-bold uppercase tracking-wider text-[#B4C4F0]/45 mb-4">Expansion</h5>
             <div className="flex flex-col gap-2.5">
               <button className="text-left text-[13px] text-[#DCE4FF]/70 hover:text-[#0FD4B0] transition-colors" onClick={onLaunch}>Performance Coach</button>
               <button className="text-left text-[13px] text-[#DCE4FF]/70 hover:text-[#0FD4B0] transition-colors" onClick={onLaunch}>JD Builder</button>

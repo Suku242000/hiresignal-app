@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Syne:wght@400..800&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -40,6 +41,16 @@
 
 @layer base {
   :root {
+    /* User provided theme */
+    --primary: #7B8BFF;
+    --secondary: #0FD4B0;
+    --accent: #FF6B6B;
+    --bg: #090D1A;
+    --surface: #141C35;
+    --text: #F0F4FF;
+    --text-dim: rgba(220, 228, 255, 0.7);
+    --border: rgba(255, 255, 255, 0.06);
+
     /* Brand palette */
     --indigo: #5B6CF9;
     --indigo-light: #7B8BFF;
@@ -53,10 +64,8 @@
     --purple: #9B6DFF;
 
     /* Backgrounds — deep navy slate */
-    --bg: #090D1A;
     --bg2: #0D1225;
     --bg3: #111830;
-    --surface: #141C35;
     --surface2: #1A2340;
     --surface3: #1F2A4A;
 
@@ -71,8 +80,8 @@
     --b3: rgba(255, 255, 255, 0.16);
 
     /* Text */
-    --t1: #F0F4FF;
-    --t2: rgba(220, 228, 255, 0.7);
+    --t1: var(--text);
+    --t2: var(--text-dim);
     --t3: rgba(180, 196, 240, 0.45);
 
     /* Radii */
@@ -102,7 +111,7 @@
   }
 
   body {
-    @apply bg-[#090D1A] text-[#F0F4FF] font-sans antialiased overflow-x-hidden min-h-screen;
+    @apply bg-[var(--bg)] text-[var(--text)] font-sans antialiased overflow-x-hidden min-h-screen;
     font-family: 'Manrope', sans-serif;
   }
 }

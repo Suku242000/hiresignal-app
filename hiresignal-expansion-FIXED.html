@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireSignal Expansion — AI HR Intelligence</title>
+  <style>
+    :root {
+      --bg: #090D1A;
+      --surface: #141C35;
+      --primary: #5B6CF9;
+      --accent: #0FD4B0;
+      --cta: #FF6B6B;
+      --text: #F0F4FF;
+      --text-dim: rgba(240, 244, 255, 0.7);
+      --border: rgba(255, 255, 255, 0.07);
+      --radius-card: 18px;
+      --radius-btn: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-bottom: 40px; border-bottom: 1px solid var(--border); }
+    .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #7B8BFF, #0FD4B0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    
+    .grid { display: grid; grid-template-columns: 300px 1fr; gap: 32px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .tool-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); padding: 16px; border-radius: 12px; text-align: left; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .tool-btn:hover { border-color: var(--primary); color: var(--text); }
+    .tool-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .main-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 40px; min-height: 600px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; background: #0D1225; border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: white; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: var(--accent); }
+
+    .btn { padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 700; font-size: 15px; border: none; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-accent { background: var(--accent); color: white; width: 100%; justify-content: center; }
+    .btn-accent:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result-area { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border); display: none; }
+    .result-content { background: #0D1225; border: 1px solid var(--border); border-radius: 12px; padding: 24px; font-size: 14px; white-space: pre-wrap; color: var(--text); }
+
+    .config-bar { background: rgba(15, 212, 176, 0.05); border: 1px solid var(--border); padding: 12px 20px; border-radius: 100px; display: flex; gap: 20px; margin-bottom: 32px; font-size: 12px; align-items: center; }
+    .config-status { color: var(--accent); font-weight: 700; }
+    
+    .loading-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.1); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html" class="logo">HireSignal Expansion</a>
+      <div style="display: flex; gap: 20px;">
+        <a href="index.html" style="color: var(--text-dim); text-decoration: none; font-size: 14px;">Home</a>
+        <a href="hiresignal-v2-FIXED.html" style="color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 700;">← Core App</a>
+      </div>
+    </nav>
+
+    <div class="config-bar" id="configBar">
+      <span>⚙️ Config: <span id="configText" class="config-status">Not Connected</span></span>
+      <a href="index.html#setup" style="color: var(--accent); text-decoration: none;">Change Settings</a>
+    </div>
+
+    <div class="grid">
+      <div class="sidebar">
+        <button class="tool-btn active" onclick="showTool('coach')">🎯 AI Performance Coach</button>
+        <button class="tool-btn" onclick="showTool('jd')">📝 Job Description Builder</button>
+        <button class="tool-btn" onclick="showTool('survey')">📡 Pulse Survey Creator</button>
+        <button class="tool-btn" onclick="showTool('career')">🌱 Career Growth Planner</button>
+      </div>
+
+      <div class="main-card">
+        <!-- Performance Coach -->
+        <div id="tool-coach" class="tool-ui">
+          <h2 style="margin-bottom: 8px;">AI Performance Coach</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Write reviews, 1-on-1 agendas, or PIPs that are fair and actionable.</p>
+          
+          <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="pc-name" placeholder="e.g. Alex Rivera">
+          </div>
+          <div class="form-group">
+            <label>Output Type</label>
+            <select id="pc-type">
+              <option value="Performance Review">Performance Review</option>
+              <option value="1-on-1 Agenda">1-on-1 Meeting Agenda</option>
+              <option value="PIP">Performance Improvement Plan (PIP)</option>
+              <option value="Recognition">Recognition/Shoutout Message</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Context / Key Points</label>
+            <textarea id="pc-ctx" rows="4" placeholder="e.g. Great execution on project Alpha, but needs to improve communication with stakeholders..."></textarea>
+          </div>
+          <button class="btn btn-accent" id="btn-pc" onclick="runCoach()">
+            <span class="loading-spinner" id="spin-pc"></span>
+            <span>Generate Coaching Content</span>
+          </button>
+        </div>
+
+        <!-- JD Builder -->
+        <div id="tool-jd" class="tool-ui" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Job Description Builder</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Build compelling, inclusive, and impact-focused job descriptions.</p>
+          
+          <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" id="jd-title" placeholder="e.g. Full Stack Engineer">
+          </div>
+          <div class="form-group">
+            <label>Key Responsibilities</label>
+            <textarea id="jd-resp" rows="3" placeholder="What will they actually do?"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Company Culture & Perks</label>
+            <textarea id="jd-culture" rows="2" placeholder="What makes your team special?"></textarea>
+          </div>
+          <button class="btn btn-accent" id="btn-jd" onclick="runJD()">
+            <span class="loading-spinner" id="spin-jd"></span>
+            <span>Build Job Description</span>
+          </button>
+        </div>
+
+        <!-- Pulse Survey -->
+        <div id="tool-survey" class="tool-ui" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Pulse Survey Creator</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Design targeted surveys or analyze results for deep insights.</p>
+          
+          <div class="form-group">
+            <label>Team / Department</label>
+            <input type="text" id="ps-team" placeholder="e.g. Engineering Team">
+          </div>
+          <div class="form-group">
+            <label>Focus Areas</label>
+            <input type="text" id="ps-focus" placeholder="e.g. Burnout, Tooling, Leadership Trust">
+          </div>
+          <div class="form-group">
+            <label>Action</label>
+            <select id="ps-action">
+              <option value="Create Survey">Create New Survey Questions</option>
+              <option value="Analyze Results">Analyze Survey Results (Paste data below)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Context / Data</label>
+            <textarea id="ps-data" rows="3" placeholder="Optional context or raw survey results to analyze..."></textarea>
+          </div>
+          <button class="btn btn-accent" id="btn-ps" onclick="runSurvey()">
+            <span class="loading-spinner" id="spin-ps"></span>
+            <span>Generate Survey Insights</span>
+          </button>
+        </div>
+
+        <!-- Career Growth -->
+        <div id="tool-career" class="tool-ui" style="display: none;">
+          <h2 style="margin-bottom: 8px;">Career Growth Planner</h2>
+          <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 32px;">Map out promotion readiness or build an upskilling roadmap.</p>
+          
+          <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="cg-name" placeholder="e.g. Jordan Smith">
+          </div>
+          <div class="form-group">
+            <label>Current Role → Target Role</label>
+            <input type="text" id="cg-target" placeholder="e.g. Junior Dev → Senior Dev">
+          </div>
+          <div class="form-group">
+            <label>Strengths & Gaps</label>
+            <textarea id="cg-gaps" rows="4" placeholder="What are they good at? What's missing for the next level?"></textarea>
+          </div>
+          <button class="btn btn-accent" id="btn-cg" onclick="runCareer()">
+            <span class="loading-spinner" id="spin-cg"></span>
+            <span>Build Growth Plan</span>
+          </button>
+        </div>
+
+        <div id="resultArea" class="result-area">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 id="resultTitle">AI Analysis</h3>
+            <button onclick="copyResult()" style="background: none; border: none; color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer;">📋 Copy Text</button>
+          </div>
+          <div id="resultContent" class="result-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentConfig = null;
+
+    window.onload = () => {
+      const saved = localStorage.getItem('hiresignal_ai_config');
+      if (saved) {
+        currentConfig = JSON.parse(saved);
+        document.getElementById('configText').innerText = "Connected (" + currentConfig.provider + ")";
+      } else {
+        document.getElementById('configText').innerText = "Not Connected";
+        document.getElementById('configText').style.color = "var(--cta)";
+      }
+    };
+
+    function showTool(toolId) {
+      document.querySelectorAll('.tool-ui').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tool-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tool-' + toolId).style.display = 'block';
+      event.currentTarget.classList.add('active');
+      document.getElementById('resultArea').style.display = 'none';
+    }
+
+    async function callAI(prompt) {
+      if (!currentConfig) {
+        alert("Please connect your AI API key and Proxy URL on the homepage first.");
+        window.location.href = "index.html#setup";
+        return;
+      }
+
+      const { provider, key, proxy } = currentConfig;
+      let payload;
+
+      if (provider === 'gemini') {
+        payload = { contents: [{ parts: [{ text: prompt }] }] };
+      } else if (provider === 'anthropic') {
+        payload = { model: 'claude-3-5-sonnet-20240620', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] };
+      } else {
+        payload = { model: 'llama3-8b-8192', messages: [{ role: 'user', content: prompt }] };
+      }
+
+      const res = await fetch(proxy, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, apiKey: key, payload })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      if (provider === 'gemini') return data.candidates[0].content.parts[0].text;
+      if (provider === 'anthropic') return data.content[0].text;
+      return data.choices[0].message.content;
+    }
+
+    async function runCoach() {
+      const name = document.getElementById('pc-name').value;
+      const type = document.getElementById('pc-type').value;
+      const ctx = document.getElementById('pc-ctx').value;
+
+      if (!name || !ctx) return alert("Please fill in name and context.");
+
+      const btn = document.getElementById('btn-pc');
+      const spin = document.getElementById('spin-pc');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `You are an AI Performance Coach. Generate a ${type} for ${name}. Context: ${ctx}. Make it professional, fair, and actionable.`;
+        const result = await callAI(prompt);
+        displayResult(type + ": " + name, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    async function runJD() {
+      const title = document.getElementById('jd-title').value;
+      const resp = document.getElementById('jd-resp').value;
+      const culture = document.getElementById('jd-culture').value;
+
+      if (!title || !resp) return alert("Please fill in title and responsibilities.");
+
+      const btn = document.getElementById('btn-jd');
+      const spin = document.getElementById('spin-jd');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `Write a compelling job description for a ${title}. Responsibilities: ${resp}. Culture: ${culture}. Include a hook, impact-framed responsibilities, and requirements.`;
+        const result = await callAI(prompt);
+        displayResult("Job Description: " + title, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    async function runSurvey() {
+      const team = document.getElementById('ps-team').value;
+      const focus = document.getElementById('ps-focus').value;
+      const action = document.getElementById('ps-action').value;
+      const data = document.getElementById('ps-data').value;
+
+      if (!team || !focus) return alert("Please fill in team and focus areas.");
+
+      const btn = document.getElementById('btn-ps');
+      const spin = document.getElementById('spin-ps');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `Action: ${action}. Team: ${team}. Focus Areas: ${focus}. Context/Data: ${data}. Provide survey questions or a detailed intelligence report with red flags and action plans.`;
+        const result = await callAI(prompt);
+        displayResult("Survey Insights: " + team, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    async function runCareer() {
+      const name = document.getElementById('cg-name').value;
+      const target = document.getElementById('cg-target').value;
+      const gaps = document.getElementById('cg-gaps').value;
+
+      if (!name || !target) return alert("Please fill in name and target role.");
+
+      const btn = document.getElementById('btn-cg');
+      const spin = document.getElementById('spin-cg');
+      btn.disabled = true; spin.style.display = 'inline-block';
+
+      try {
+        const prompt = `Build a career growth plan for ${name}. Path: ${target}. Strengths & Gaps: ${gaps}. Include a phased roadmap, resources, and success metrics.`;
+        const result = await callAI(prompt);
+        displayResult("Growth Plan: " + name, result);
+      } catch (e) {
+        alert("Error: " + e.message);
+      } finally {
+        btn.disabled = false; spin.style.display = 'none';
+      }
+    }
+
+    function displayResult(title, content) {
+      document.getElementById('resultTitle').innerText = title;
+      document.getElementById('resultContent').innerText = content;
+      document.getElementById('resultArea').style.display = 'block';
+      document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyResult() {
+      const text = document.getElementById('resultContent').innerText;
+      navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+    }
+  </script>
+</body>
+</html>
