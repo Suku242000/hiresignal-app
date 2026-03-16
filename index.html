@@ -1,16 +1,295 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HireSignal — AI HR Intelligence for Modern Teams</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=Manrope:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HireSignal — AI HR Intelligence</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#090D1A;color:#F0F4FF;min-height:100vh}
+.nav{background:#0D1225;border-bottom:1px solid rgba(255,255,255,.08);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,#7B8BFF,#0FD4B0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-cta{background:linear-gradient(135deg,#5B6CF9,#3D4FDB);color:#fff;padding:10px 22px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+.nav-cta:hover{opacity:.9}
+.hero{text-align:center;padding:90px 24px 70px;max-width:780px;margin:0 auto}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(91,108,249,.12);border:1px solid rgba(91,108,249,.28);border-radius:999px;padding:8px 20px;font-size:12px;font-weight:600;color:#7B8BFF;margin-bottom:28px}
+.dot{width:7px;height:7px;border-radius:50%;background:#0FD4B0;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(36px,6vw,70px);font-weight:800;line-height:1.08;letter-spacing:-2px;margin-bottom:20px}
+.g1{background:linear-gradient(135deg,#7B8BFF,#9B6DFF,#0FD4B0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.g2{background:linear-gradient(135deg,#0FD4B0,#22C55E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:17px;color:rgba(220,228,255,.7);max-width:520px;margin:0 auto 40px;line-height:1.8}
+.btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .2s;text-decoration:none}
+.btn-p{background:linear-gradient(135deg,#5B6CF9,#3D4FDB);color:#fff;box-shadow:0 0 28px rgba(91,108,249,.3)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(91,108,249,.5)}
+.btn-c{background:linear-gradient(135deg,#FF6B6B,#e85555);color:#fff}
+.btn-c:hover{transform:translateY(-2px)}
+.btn-g{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#F0F4FF}
+.btn-g:hover{background:rgba(255,255,255,.11)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;max-width:880px;margin:60px auto 70px}
+.stat{background:#141C35;padding:26px 20px;text-align:center}
+.sn{font-size:34px;font-weight:800;line-height:1;margin-bottom:5px}
+.s1{background:linear-gradient(135deg,#7B8BFF,#9B6DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s2{background:linear-gradient(135deg,#0FD4B0,#22C55E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s3{background:linear-gradient(135deg,#FF6B6B,#FFB347);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s4{background:linear-gradient(135deg,#9B6DFF,#7B8BFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sl{font-size:11px;color:rgba(180,196,240,.42);text-transform:uppercase;letter-spacing:.5px}
+.sec{max-width:1080px;margin:0 auto 70px;padding:0 24px}
+.sec-title{font-size:clamp(24px,3.5vw,38px);font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:10px;text-align:center}
+.sec-sub{font-size:15px;color:rgba(220,228,255,.62);max-width:460px;margin:0 auto 36px;line-height:1.7;text-align:center}
+.eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(180,196,240,.4);margin-bottom:12px;text-align:center}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#141C35;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:26px;cursor:pointer;transition:all .28s;display:flex;flex-direction:column}
+.card:hover{border-color:rgba(255,255,255,.16);transform:translateY(-5px);background:#1A2340}
+.hero-card{grid-column:span 2;display:flex;flex-direction:row;padding:0;overflow:hidden}
+.hc-l{padding:28px;flex:1.1;display:flex;flex-direction:column}
+.hc-r{flex:1;border-left:1px solid rgba(255,255,255,.07);padding:18px;display:flex;flex-direction:column;gap:9px;justify-content:center;background:rgba(9,13,26,.4)}
+.tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:3px 10px;border-radius:999px;margin-bottom:12px}
+.t1{background:rgba(91,108,249,.12);border:1px solid rgba(91,108,249,.25);color:#7B8BFF}
+.t2{background:rgba(15,212,176,.1);border:1px solid rgba(15,212,176,.22);color:#0FD4B0}
+.t3{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);color:#FF8E8E}
+.t4{background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.2);color:#FFB347}
+.t5{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#22C55E}
+.t6{background:rgba(155,109,255,.1);border:1px solid rgba(155,109,255,.2);color:#9B6DFF}
+.ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.i1{background:rgba(91,108,249,.15);border:1px solid rgba(91,108,249,.25)}
+.i2{background:rgba(15,212,176,.12);border:1px solid rgba(15,212,176,.22)}
+.i3{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.2)}
+.i4{background:rgba(255,179,71,.12);border:1px solid rgba(255,179,71,.2)}
+.i5{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2)}
+.i6{background:rgba(155,109,255,.12);border:1px solid rgba(155,109,255,.2)}
+.ctitle{font-size:17px;font-weight:700;margin-bottom:7px;line-height:1.25}
+.cdesc{font-size:13px;color:rgba(220,228,255,.62);line-height:1.65;flex:1;margin-bottom:14px}
+.clink{font-size:12px;font-weight:600;color:rgba(180,196,240,.4);transition:all .2s;margin-top:auto}
+.card:hover .clink{color:#F0F4FF}
+.mi{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 13px}
+.mi:hover{background:rgba(255,255,255,.07)}
+.mt{font-size:13px;font-weight:500;color:rgba(220,228,255,.62);flex:1}
+.mp{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(15,212,176,.1);border:1px solid rgba(15,212,176,.2);color:#0FD4B0}
+.prob-bg{background:#141C35;border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:48px;margin-bottom:70px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px}
+.pc{background:#0D1225;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;transition:all .25s}
+.pc:hover{border-color:rgba(255,255,255,.12);transform:translateY(-3px)}
+.pn{font-size:30px;font-weight:800;margin-bottom:5px}
+.red{color:#FF6B6B}.amber{color:#FFB347}.ind{color:#7B8BFF}
+.ptxt{font-size:13px;color:rgba(220,228,255,.62);line-height:1.6}
+.psrc{font-size:11px;color:rgba(180,196,240,.38);margin-top:7px;font-style:italic}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.step{background:#141C35;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:26px 18px;text-align:center;transition:all .25s}
+.step:hover{border-color:rgba(255,255,255,.13);transform:translateY(-4px)}
+.stepn{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;margin:0 auto 16px}
+.n1{background:linear-gradient(135deg,#5B6CF9,#3D4FDB);box-shadow:0 0 22px rgba(91,108,249,.3)}
+.n2{background:linear-gradient(135deg,#0FD4B0,#0bb890);box-shadow:0 0 18px rgba(15,212,176,.25)}
+.n3{background:linear-gradient(135deg,#FFB347,#f59e0b);box-shadow:0 0 16px rgba(255,179,71,.25)}
+.n4{background:linear-gradient(135deg,#22C55E,#16a34a);box-shadow:0 0 16px rgba(34,197,94,.22)}
+.stitle{font-size:14px;font-weight:700;margin-bottom:6px}
+.sdesc{font-size:12px;color:rgba(180,196,240,.42);line-height:1.6}
+.trust{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;margin-bottom:70px}
+.ti{background:#141C35;padding:32px 24px;text-align:center}
+.ti:hover{background:#1A2340}
+.tn{font-size:46px;font-weight:800;line-height:1;margin-bottom:7px}
+.ttxt{font-size:14px;color:rgba(220,228,255,.62);line-height:1.55;margin-bottom:5px}
+.tsrc{font-size:11px;color:rgba(180,196,240,.38);font-style:italic}
+.cta-blk{background:linear-gradient(135deg,rgba(91,108,249,.09),rgba(15,212,176,.07));border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:60px 36px;text-align:center;margin-bottom:70px}
+.cta-blk h2{font-size:clamp(24px,4vw,42px);font-weight:800;letter-spacing:-1.5px;margin-bottom:12px}
+.cta-blk p{font-size:16px;color:rgba(220,228,255,.65);max-width:400px;margin:0 auto 32px;line-height:1.75}
+.meta{font-size:12px;color:rgba(180,196,240,.38);margin-top:14px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.footer{max-width:1080px;margin:0 auto;padding:36px 24px 60px;border-top:1px solid rgba(255,255,255,.07);display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
+.flogo{font-size:19px;font-weight:800;background:linear-gradient(135deg,#7B8BFF,#0FD4B0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:9px}
+.fdesc{font-size:13px;color:rgba(180,196,240,.4);line-height:1.7;max-width:230px}
+.fh{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(180,196,240,.4);margin-bottom:12px}
+.fl{display:block;font-size:13px;color:rgba(220,228,255,.55);text-decoration:none;margin-bottom:8px;cursor:pointer;transition:color .15s}
+.fl:hover{color:#0FD4B0}
+.fbot{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.07);padding-top:16px;margin-top:6px;display:flex;justify-content:space-between;font-size:12px;color:rgba(180,196,240,.35);flex-wrap:wrap;gap:6px}
+@media(max-width:860px){
+  .stats{grid-template-columns:1fr 1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .hero-card{grid-column:span 2}
+  .steps{grid-template-columns:1fr 1fr}
+  .trust{grid-template-columns:1fr}
+  .footer{grid-template-columns:1fr 1fr}
+  .pgrid{grid-template-columns:1fr}
+}
+@media(max-width:580px){
+  .nav{padding:14px 16px}
+  .grid3{grid-template-columns:1fr}
+  .hero-card{grid-column:span 1;flex-direction:column}
+  .hc-r{border-left:none;border-top:1px solid rgba(255,255,255,.07)}
+  h1{letter-spacing:-1.5px}
+  .cta-blk{padding:36px 18px}
+  .prob-bg{padding:24px 16px}
+  .footer{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
 
+<div class="nav">
+  <div class="logo">HireSignal</div>
+  <button class="nav-cta" onclick="window.location='hiresignal-v2-FIXED.html'">Launch App →</button>
+</div>
+
+<div class="hero">
+  <div class="badge"><span class="dot"></span>7 AI-powered HR tools · Free forever</div>
+  <h1>
+    <span style="color:#F0F4FF">Your HR team deserves</span><br>
+    <span class="g1">smarter tools,</span><br>
+    <span class="g2">not more busywork</span>
+  </h1>
+  <p>From onboarding to exit intelligence, retention risk to career growth — HireSignal does in seconds what takes your HR team hours. Free. No sign-up needed.</p>
+  <div class="btns">
+    <button class="btn btn-p" onclick="window.location='hiresignal-v2-FIXED.html'">🚀 Launch Core App</button>
+    <button class="btn btn-c" onclick="window.location='hiresignal-expansion-FIXED.html'">🧠 Expansion Pack</button>
+    <a class="btn btn-g" href="https://github.com/Suku242000/hiresignal-app" target="_blank">⭐ GitHub</a>
+  </div>
+</div>
+
+<div style="padding:0 24px">
+  <div class="stats">
+    <div class="stat"><div class="sn s1">7</div><div class="sl">AI Tools</div></div>
+    <div class="stat"><div class="sn s2">100K</div><div class="sl">Free/day</div></div>
+    <div class="stat"><div class="sn s3">5 min</div><div class="sl">Setup</div></div>
+    <div class="stat"><div class="sn s4">$0</div><div class="sl">Cost</div></div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="prob-bg">
+    <div class="eyebrow">Why HireSignal exists</div>
+    <h2 class="sec-title">HR teams are drowning in problems<br><span class="g1">AI can already solve</span></h2>
+    <p class="sec-sub">Every tool we built solves a real documented problem.</p>
+    <div class="pgrid">
+      <div class="pc"><div style="font-size:20px;margin-bottom:9px">😤</div><div class="pn red">98%</div><div class="ptxt">of CHROs say performance management is broken and needs replacing</div><div class="psrc">Gartner HR Survey 2026 → Built Performance Coach</div></div>
+      <div class="pc"><div style="font-size:20px;margin-bottom:9px">😶</div><div class="pn amber">26%</div><div class="ptxt">of employees feel engaged at work — HR teams don't know who's at risk until they resign</div><div class="psrc">Gallup 2026 → Built Retention Risk Score</div></div>
+      <div class="pc"><div style="font-size:20px;margin-bottom:9px">🔄</div><div class="pn ind">64%</div><div class="ptxt">of HR leaders say developing future leaders is their #1 priority yet most have no growth paths</div><div class="psrc">McLean & Company → Built Career Growth Planner</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="tools">
+  <div class="eyebrow">All Tools</div>
+  <h2 class="sec-title">Everything your team needs</h2>
+  <p class="sec-sub">Click any card to open the tool directly. No login required.</p>
+  <div class="grid3">
+    <div class="card hero-card" onclick="window.location='hiresignal-v2-FIXED.html'">
+      <div class="hc-l">
+        <div class="tag t1">Core App · File 1</div>
+        <div class="ico i1">⚡</div>
+        <div class="ctitle">HireSignal Core — 3 Essential Tools</div>
+        <p class="cdesc">Automate onboarding, capture exit intelligence, and flag retention risks before they become resignations.</p>
+        <div class="clink">Open Core App →</div>
+      </div>
+      <div class="hc-r">
+        <div class="mi"><span style="font-size:14px">🚀</span><span class="mt">30-Day Onboarding Plan</span><span class="mp">AI</span></div>
+        <div class="mi"><span style="font-size:14px">🚪</span><span class="mt">Exit Intelligence Report</span><span class="mp">AI</span></div>
+        <div class="mi"><span style="font-size:14px">📊</span><span class="mt">Retention Risk Score</span><span class="mp">0–100</span></div>
+      </div>
+    </div>
+    <div class="card" onclick="window.location='hiresignal-expansion-FIXED.html'">
+      <div class="tag t2">Expansion Pack · File 2</div>
+      <div class="ico i2">🧠</div>
+      <div class="ctitle">4 Advanced Modules</div>
+      <p class="cdesc">Performance coaching, job descriptions, pulse surveys, and career growth planning.</p>
+      <div class="clink">Open Expansion Pack →</div>
+    </div>
+    <div class="card" onclick="window.location='hiresignal-expansion-FIXED.html'">
+      <div class="tag t3">Performance</div>
+      <div class="ico i3">🎯</div>
+      <div class="ctitle">AI Performance Coach</div>
+      <p class="cdesc">Write reviews, 1-on-1 agendas, PIPs, and recognition messages that motivate.</p>
+      <div class="clink">Open Tool →</div>
+    </div>
+    <div class="card" onclick="window.location='hiresignal-expansion-FIXED.html'">
+      <div class="tag t4">Recruiting</div>
+      <div class="ico i4">📝</div>
+      <div class="ctitle">Job Description Builder</div>
+      <p class="cdesc">AI writes compelling, inclusive JDs that attract the right candidates.</p>
+      <div class="clink">Open Tool →</div>
+    </div>
+    <div class="card" onclick="window.location='hiresignal-expansion-FIXED.html'">
+      <div class="tag t5">Engagement</div>
+      <div class="ico i5">📡</div>
+      <div class="ctitle">Pulse Survey Creator</div>
+      <p class="cdesc">Build smart surveys + AI analyzes results with red flags and action plan.</p>
+      <div class="clink">Open Tool →</div>
+    </div>
+    <div class="card" onclick="window.location='hiresignal-expansion-FIXED.html'">
+      <div class="tag t6">Growth</div>
+      <div class="ico i6">🌱</div>
+      <div class="ctitle">Career Growth Planner</div>
+      <p class="cdesc">Map growth paths, check promotion readiness, build upskilling roadmaps.</p>
+      <div class="clink">Open Tool →</div>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="how">
+  <div class="eyebrow">How It Works</div>
+  <h2 class="sec-title">Live in under 10 minutes</h2>
+  <p class="sec-sub">No coding. No configuration. Just paste, deploy, and go.</p>
+  <div class="steps">
+    <div class="step"><div class="stepn n1">1</div><div class="stitle">Deploy Proxy</div><p class="sdesc">Paste worker.js into Cloudflare Workers free plan. 2 minutes.</p></div>
+    <div class="step"><div class="stepn n2">2</div><div class="stitle">Get API Key</div><p class="sdesc">Free Gemini key from aistudio.google.com. No card needed.</p></div>
+    <div class="step"><div class="stepn n3">3</div><div class="stitle">Connect</div><p class="sdesc">Paste key and proxy URL into setup card. Green tick = live.</p></div>
+    <div class="step"><div class="stepn n4">4</div><div class="stitle">Share It</div><p class="sdesc">Post your live URL anywhere. Anyone can use it free.</p></div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="trust">
+    <div class="ti"><div class="tn" style="background:linear-gradient(135deg,#FF6B6B,#FFB347);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">98%</div><p class="ttxt">of CHROs say performance management is broken</p><div class="tsrc">Gartner HR Survey 2026</div></div>
+    <div class="ti"><div class="tn" style="background:linear-gradient(135deg,#7B8BFF,#9B6DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">26%</div><p class="ttxt">of employees globally feel engaged at work</p><div class="tsrc">Gallup State of Global Workplace</div></div>
+    <div class="ti"><div class="tn" style="background:linear-gradient(135deg,#0FD4B0,#22C55E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">64%</div><p class="ttxt">of HR leaders say developing future leaders is their #1 priority</p><div class="tsrc">McLean & Company HR Trends</div></div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="cta-blk">
+    <h2>Ready to fix your HR team's<br><span class="g1">biggest headaches?</span></h2>
+    <p>Free, open source, runs on your own AI key. No subscriptions. No lock-in.</p>
+    <div class="btns">
+      <button class="btn btn-p" onclick="window.location='hiresignal-v2-FIXED.html'">🚀 Launch Core App</button>
+      <button class="btn btn-c" onclick="window.location='hiresignal-expansion-FIXED.html'">🧠 Expansion Pack</button>
+      <a class="btn btn-g" href="https://github.com/Suku242000/hiresignal-app" target="_blank">⭐ Star on GitHub</a>
+    </div>
+    <div class="meta">
+      <span>✓ Completely free</span>
+      <span>✓ Open source MIT</span>
+      <span>✓ No sign-up needed</span>
+      <span>✓ Works with Gemini & Claude</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>
+    <div class="flogo">HireSignal</div>
+    <p class="fdesc">AI HR intelligence platform. Free, open source, powered by your own key.</p>
+  </div>
+  <div><div class="fh">Core Tools</div>
+    <a class="fl" onclick="window.location='hiresignal-v2-FIXED.html'">Onboarding Planner</a>
+    <a class="fl" onclick="window.location='hiresignal-v2-FIXED.html'">Exit Intelligence</a>
+    <a class="fl" onclick="window.location='hiresignal-v2-FIXED.html'">Retention Risk</a>
+  </div>
+  <div><div class="fh">Expansion</div>
+    <a class="fl" onclick="window.location='hiresignal-expansion-FIXED.html'">Performance Coach</a>
+    <a class="fl" onclick="window.location='hiresignal-expansion-FIXED.html'">JD Builder</a>
+    <a class="fl" onclick="window.location='hiresignal-expansion-FIXED.html'">Pulse Surveys</a>
+    <a class="fl" onclick="window.location='hiresignal-expansion-FIXED.html'">Career Growth</a>
+  </div>
+  <div><div class="fh">Links</div>
+    <a class="fl" href="https://github.com/Suku242000/hiresignal-app" target="_blank">GitHub</a>
+    <a class="fl" href="https://aistudio.google.com" target="_blank">Google AI Studio</a>
+    <a class="fl" href="https://workers.cloudflare.com" target="_blank">Cloudflare Workers</a>
+  </div>
+  <div class="fbot">
+    <span>© 2026 HireSignal · MIT License</span>
+    <span>Built with Gemini AI & Claude AI</span>
+  </div>
+</div>
+
+</body>
+</html>
