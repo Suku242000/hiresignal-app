@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HireSignal — AI Employee Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --pink:#FF3CAC;--purple:#784BA0;--blue:#2B86C5;--cyan:#00F5D4;--yellow:#FFE14D;
+  --dark:#08080f;--dark2:#0f0f1e;
+  --glass:rgba(255,255,255,0.04);--glass2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--borderl:rgba(255,255,255,0.16);
+  --text:#fff;--text2:rgba(255,255,255,0.65);--text3:rgba(255,255,255,0.35);
+  --r:16px;--rl:24px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:0.14;pointer-events:none;z-index:0;animation:of 9s ease-in-out infinite}
+.o1{width:700px;height:700px;background:radial-gradient(var(--pink),var(--purple));top:-250px;left:-200px}
+.o2{width:550px;height:550px;background:radial-gradient(var(--blue),var(--cyan));top:25%;right:-220px;animation-delay:-3.5s}
+.o3{width:450px;height:450px;background:radial-gradient(var(--cyan),var(--yellow));bottom:-150px;left:25%;animation-delay:-7s}
+@keyframes of{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-50px) scale(1.06)}}
+.shell{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px 120px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:28px 0 0;margin-bottom:90px;animation:fu .8s ease both}
+.logo{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px}
+.npill{background:var(--glass2);border:1px solid var(--border);border-radius:999px;padding:7px 18px;font-size:12px;color:var(--text2);backdrop-filter:blur(12px)}
+.npill b{color:var(--cyan)}
+.hero{text-align:center;margin-bottom:80px;animation:fu .9s .1s ease both}
+.ey{display:inline-flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--borderl);border-radius:999px;padding:8px 20px;font-size:12px;color:var(--text2);margin-bottom:32px;backdrop-filter:blur(12px)}
+.pd{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(40px,7vw,78px);font-weight:800;line-height:1.04;letter-spacing:-2.5px;margin-bottom:22px}
+.g1{background:linear-gradient(135deg,var(--pink) 0%,var(--purple) 40%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.g2{background:linear-gradient(135deg,var(--cyan),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:17px;color:var(--text2);max-width:510px;margin:0 auto 44px;line-height:1.75;font-weight:300}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s;letter-spacing:-.1px}
+.btn-glow{background:linear-gradient(135deg,var(--pink),var(--purple),var(--blue));color:#fff;box-shadow:0 0 30px rgba(255,60,172,.35)}
+.btn-glow:hover{transform:translateY(-2px);box-shadow:0 0 55px rgba(255,60,172,.55)}
+.btn-glow:active{transform:scale(.97)}
+.btn-glow:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:var(--glass);border:1px solid var(--borderl);color:var(--text);backdrop-filter:blur(12px)}
+.btn-ghost:hover{background:var(--glass2)}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#050510;font-weight:700}
+.btn-cyan:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(0,245,212,.4)}
+.btn-sm{padding:9px 20px;font-size:13px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:64px;animation:fu .9s .2s ease both}
+.scard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;text-align:center;backdrop-filter:blur(16px);transition:all .25s}
+.scard:hover{border-color:var(--borderl);transform:translateY(-4px)}
+.snum{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--pink),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.slbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:6px}
+
+/* CONNECTION SETUP CARD */
+.setup-card{background:linear-gradient(135deg,rgba(0,245,212,.05),rgba(120,75,160,.05));border:1px solid rgba(0,245,212,.2);border-radius:var(--rl);padding:28px 32px;margin-bottom:52px;animation:fu .9s .3s ease both;backdrop-filter:blur(16px)}
+.setup-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.setup-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:end}
+.setup-f{display:flex;flex-direction:column;gap:7px}
+.setup-f label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.7px}
+.setup-input{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.setup-input:focus{border-color:rgba(0,245,212,.45)}
+.setup-sel{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);outline:none;cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.35)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;width:100%}
+.setup-sel option{background:#1a1a2e}
+.setup-status{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;display:none}
+.status-dot{width:8px;height:8px;border-radius:50%}
+.dot-ok{background:var(--cyan);animation:p 2s infinite}
+.dot-err{background:var(--pink)}
+.setup-hint{font-size:12px;color:var(--text3);margin-top:10px;line-height:1.6}
+.setup-hint a{color:var(--cyan);text-decoration:none}
+.setup-hint a:hover{text-decoration:underline}
+
+.slabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--border)}
+.tabs{display:flex;gap:0;margin-bottom:32px;background:var(--glass);border:1px solid var(--border);border-radius:var(--rl);padding:6px;backdrop-filter:blur(16px);animation:fu .9s .4s ease both}
+.tbtn{flex:1;padding:13px 16px;border-radius:14px;border:none;background:transparent;color:var(--text2);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.tbtn:hover{color:var(--text);background:var(--glass2)}
+.tbtn.active{color:#fff;background:linear-gradient(135deg,var(--pink),var(--purple));box-shadow:0 4px 24px rgba(255,60,172,.32)}
+.tico{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.panel{display:none;animation:fu .35s ease}
+.panel.active{display:block}
+.gcard{background:var(--glass);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;backdrop-filter:blur(20px);transition:border-color .3s}
+.gcard:hover{border-color:var(--borderl)}
+.gcard-head{padding:30px 32px 26px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:18px}
+.gico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.gico-pink{background:linear-gradient(135deg,rgba(255,60,172,.25),rgba(120,75,160,.25));border:1px solid rgba(255,60,172,.25)}
+.gico-blue{background:linear-gradient(135deg,rgba(43,134,197,.25),rgba(0,245,212,.25));border:1px solid rgba(43,134,197,.25)}
+.gico-yel{background:linear-gradient(135deg,rgba(255,225,77,.2),rgba(255,60,172,.2));border:1px solid rgba(255,225,77,.2)}
+.gtitle{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:5px}
+.gsub{font-size:13px;color:var(--text3);line-height:1.55;max-width:580px}
+.gbody{padding:32px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.f{display:flex;flex-direction:column;gap:8px}
+.f.full{grid-column:1/-1}
+.f label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.f input,.f select,.f textarea{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--text);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 16px;outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:rgba(255,60,172,.45);background:rgba(255,60,172,.03)}
+.f input::placeholder,.f textarea::placeholder{color:var(--text3)}
+.f textarea{resize:vertical;min-height:105px;line-height:1.65}
+.f select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.35)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:42px}
+.f select option{background:#1a1a2e;color:#fff}
+.form-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:26px}
+.loader{height:3px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden;margin:20px 0;display:none}
+.loader.on{display:block}
+.lbar{height:100%;width:35%;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--yellow));border-radius:999px;animation:la 1.6s ease-in-out infinite}
+@keyframes la{0%{transform:translateX(-200%)}100%{transform:translateX(400%)}}
+.result{background:rgba(0,245,212,.03);border:1px solid rgba(0,245,212,.13);border-radius:var(--r);padding:26px;margin-top:24px;display:none}
+.result.show{display:block;animation:fu .4s ease}
+.rtag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--cyan);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.rtag::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--cyan);display:inline-block;animation:p 2s infinite}
+.rtext{font-size:14px;line-height:1.9;color:rgba(255,255,255,.82);white-space:pre-wrap;font-weight:300}
+.cbtn{margin-left:auto;background:rgba(0,245,212,.1);border:1px solid rgba(0,245,212,.2);color:var(--cyan);padding:4px 13px;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.cbtn:hover{background:rgba(0,245,212,.22)}
+.rmeter{display:none;gap:22px;align-items:center;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;margin-top:20px}
+.rmeter.show{display:flex;animation:fu .4s ease}
+.rring{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0;position:relative}
+.rring::before{content:'';position:absolute;inset:0;border-radius:50%;padding:3.5px;background:conic-gradient(var(--rc,var(--cyan)) var(--rp,50%),rgba(255,255,255,.06) var(--rp,50%));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.rscore{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.rslbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.rinfo h4{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:6px}
+.rinfo p{font-size:13px;color:var(--text2);line-height:1.6}
+.rbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 13px;border-radius:999px;font-size:11px;font-weight:700;margin-bottom:9px}
+.rb-low{background:rgba(0,245,212,.1);border:1px solid rgba(0,245,212,.3);color:var(--cyan)}
+.rb-med{background:rgba(255,225,77,.08);border:1px solid rgba(255,225,77,.28);color:var(--yellow)}
+.rb-high{background:rgba(255,60,172,.08);border:1px solid rgba(255,60,172,.28);color:var(--pink)}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){
+  .fg{grid-template-columns:1fr}
+  .tabs{flex-direction:column}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:36px;letter-spacing:-1.5px}
+  .setup-grid{grid-template-columns:1fr}
+  .gbody{padding:20px}
+  .rmeter.show{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<div class="shell">
+  <nav>
+    <div class="logo">HireSignal</div>
+    <div class="npill">v2 · CORS Fixed · <b>Works Everywhere</b></div>
+  </nav>
+
+  <div class="hero">
+    <div class="ey"><span class="pd"></span>The world's smartest HR intelligence platform</div>
+    <h1>Turn every hire &amp; exit<br>into <span class="g1">pure intelligence</span><br><span class="g2">for your team</span></h1>
+    <p>AI-powered onboarding plans, exit intelligence reports, and retention risk scores. Built for businesses that move fast.</p>
+    <div class="hero-btns">
+      <button class="btn btn-glow" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">Launch App &nbsp;→</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('setup').scrollIntoView({behavior:'smooth'})">Connect AI</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="scard"><div class="snum" id="s1">0</div><div class="slbl">Hires onboarded</div></div>
+    <div class="scard"><div class="snum" id="s2">0</div><div class="slbl">Exit reports made</div></div>
+    <div class="scard"><div class="snum" id="s3">—</div><div class="slbl">Avg retention risk</div></div>
+  </div>
+
+  <!-- CONNECTION SETUP -->
+  <div class="setup-card" id="setup">
+    <div class="setup-title">⚙️ AI Connection Setup</div>
+    <div class="setup-sub">Choose your AI provider and connect your proxy. Takes 5 minutes. Works forever.</div>
+    <div class="setup-grid">
+      <div class="setup-f">
+        <label>AI Provider</label>
+        <select class="setup-sel" id="cfg-provider" onchange="updateHints()">
+          <option value="gemini">Gemini (Google AI Studio)</option>
+          <option value="anthropic">Claude (Anthropic)</option>
+        </select>
+      </div>
+      <div class="setup-f">
+        <label>Your API Key</label>
+        <input type="password" class="setup-input" id="cfg-key" placeholder="Paste your API key here..."/>
+      </div>
+      <div class="setup-f">
+        <label>Proxy URL (Cloudflare Worker)</label>
+        <input type="text" class="setup-input" id="cfg-proxy" placeholder="https://your-worker.workers.dev"/>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-cyan btn-sm" onclick="testConnection()">🔌 Test Connection</button>
+      <button class="btn btn-ghost btn-sm" onclick="saveConfig()">💾 Save Config</button>
+    </div>
+    <div class="setup-status" id="setup-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-msg"></span>
+    </div>
+    <div class="setup-hint" id="setup-hint">
+      📖 <strong>Step 1:</strong> Go to <a href="https://workers.cloudflare.com" target="_blank">workers.cloudflare.com</a> → Create Worker → Paste the <code>worker.js</code> file → Deploy → Copy the URL here.<br>
+      📖 <strong>Step 2:</strong> Get your free Gemini key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → API Keys, OR your Anthropic key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.<br>
+      📖 <strong>Step 3:</strong> Click Test Connection. If it says ✅ you're live!
+    </div>
+  </div>
+
+  <div id="main">
+    <div class="slabel">Choose your tool</div>
+    <div class="tabs">
+      <button class="tbtn active" onclick="sw('onboard',this)"><span class="tico gico-pink">🚀</span> New Hire Onboarding</button>
+      <button class="tbtn" onclick="sw('exit',this)"><span class="tico gico-blue">🚪</span> Exit Intelligence</button>
+      <button class="tbtn" onclick="sw('risk',this)"><span class="tico gico-yel">📊</span> Retention Risk Score</button>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div class="panel active" id="panel-onboard">
+      <div class="gcard">
+        <div class="gcard-head">
+          <div class="gico gico-pink">🚀</div>
+          <div><div class="gtitle">Generate 30-Day Onboarding Plan</div><div class="gsub">AI builds a laser-focused, role-specific onboarding journey in seconds.</div></div>
+        </div>
+        <div class="gbody">
+          <div class="fg">
+            <div class="f"><label>Employee Name</label><input id="ob-name" placeholder="e.g. Sarah Johnson"/></div>
+            <div class="f"><label>Job Title</label><input id="ob-role" placeholder="e.g. Senior Marketing Manager"/></div>
+            <div class="f"><label>Department</label>
+              <select id="ob-dept"><option value="">Select...</option><option>Sales</option><option>Marketing</option><option>Engineering</option><option>Operations</option><option>Finance</option><option>HR / People</option><option>Customer Success</option><option>Product</option><option>Design</option><option>Other</option></select>
+            </div>
+            <div class="f"><label>Start Date</label><input id="ob-start" placeholder="e.g. April 1, 2026"/></div>
+            <div class="f"><label>Experience Level</label>
+              <select id="ob-level"><option value="">Select...</option><option>Entry level (0–2 yrs)</option><option>Mid level (3–6 yrs)</option><option>Senior (7–12 yrs)</option><option>Leadership / Director+</option></select>
+            </div>
+            <div class="f"><label>Work Arrangement</label>
+              <select id="ob-work"><option>Remote</option><option>Hybrid</option><option>On-site</option></select>
+            </div>
+            <div class="f full"><label>Key Goals for First 30 Days</label>
+              <textarea id="ob-goals" placeholder="e.g. Learn the product, meet all stakeholders, shadow 5 customer calls, contribute to Q2 campaign planning..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-glow" onclick="genOnboard()">✨ Generate Plan</button>
+            <button class="btn btn-ghost" onclick="clr('ob')">Clear</button>
+          </div>
+          <div class="loader" id="ob-loader"><div class="lbar"></div></div>
+          <div class="result" id="ob-result">
+            <div class="rtag">AI-Generated 30-Day Onboarding Plan <button class="cbtn" onclick="cp('ob-rt')">Copy</button></div>
+            <div class="rtext" id="ob-rt"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXIT -->
+    <div class="panel" id="panel-exit">
+      <div class="gcard">
+        <div class="gcard-head">
+          <div class="gico gico-blue">🚪</div>
+          <div><div class="gtitle">Exit Interview Intelligence</div><div class="gsub">AI turns exit notes into a structured handover, risk signals, and hiring guidance.</div></div>
+        </div>
+        <div class="gbody">
+          <div class="fg">
+            <div class="f"><label>Departing Employee</label><input id="ex-name" placeholder="e.g. Rahul Mehta"/></div>
+            <div class="f"><label>Role / Title</label><input id="ex-role" placeholder="e.g. Lead Developer"/></div>
+            <div class="f"><label>Years at Company</label><input id="ex-years" placeholder="e.g. 3.5 years"/></div>
+            <div class="f"><label>Reason for Leaving</label>
+              <select id="ex-reason"><option value="">Select...</option><option>Better opportunity / higher pay</option><option>Career growth elsewhere</option><option>Relocation</option><option>Work-life balance</option><option>Management / culture issues</option><option>Personal reasons</option><option>Retirement</option><option>Other</option></select>
+            </div>
+            <div class="f full"><label>Exit Interview Notes</label>
+              <textarea id="ex-notes" style="min-height:120px" placeholder="Paste everything from the exit interview. What did they say about the role, team, leadership, what worked, what didn't?"></textarea>
+            </div>
+            <div class="f full"><label>Key Projects & Responsibilities (for knowledge transfer)</label>
+              <textarea id="ex-projects" placeholder="e.g. Owned backend API, managed Vendor X, only person who could deploy to production..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-glow" onclick="genExit()">📋 Generate Exit Report</button>
+            <button class="btn btn-ghost" onclick="clr('ex')">Clear</button>
+          </div>
+          <div class="loader" id="ex-loader"><div class="lbar"></div></div>
+          <div class="result" id="ex-result">
+            <div class="rtag">AI Exit Intelligence Report <button class="cbtn" onclick="cp('ex-rt')">Copy</button></div>
+            <div class="rtext" id="ex-rt"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISK -->
+    <div class="panel" id="panel-risk">
+      <div class="gcard">
+        <div class="gcard-head">
+          <div class="gico gico-yel">📊</div>
+          <div><div class="gtitle">Retention Risk Score</div><div class="gsub">AI flags who might be at risk before it's too late — and tells you exactly what to do.</div></div>
+        </div>
+        <div class="gbody">
+          <div class="fg">
+            <div class="f"><label>Employee Name</label><input id="rs-name" placeholder="e.g. Priya Sharma"/></div>
+            <div class="f"><label>Role</label><input id="rs-role" placeholder="e.g. Account Manager"/></div>
+            <div class="f"><label>Time in Current Role</label>
+              <select id="rs-tenure"><option>Less than 6 months</option><option>6–12 months</option><option selected>1–2 years</option><option>2–4 years</option><option>4+ years</option></select>
+            </div>
+            <div class="f"><label>Last Performance Review</label>
+              <select id="rs-perf"><option>Exceeds expectations</option><option selected>Meets expectations</option><option>Below expectations</option><option>No review done yet</option></select>
+            </div>
+            <div class="f full"><label>Recent Manager Observations</label>
+              <textarea id="rs-obs" placeholder="What have you noticed? e.g. Less engaged in meetings, missed deadlines, mentioned feeling undervalued..."></textarea>
+            </div>
+            <div class="f full"><label>Recent Company Changes Affecting Them</label>
+              <textarea id="rs-changes" placeholder="e.g. Reorg 2 months ago, their manager left, passed over for promotion..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-glow" onclick="genRisk()">🎯 Analyze Risk</button>
+            <button class="btn btn-ghost" onclick="clr('rs')">Clear</button>
+          </div>
+          <div class="loader" id="rs-loader"><div class="lbar"></div></div>
+          <div class="rmeter" id="rs-meter">
+            <div class="rring" id="rs-ring"><span class="rscore" id="rs-num">—</span><span class="rslbl">Risk</span></div>
+            <div class="rinfo">
+              <div class="rbadge rb-low" id="rs-badge">Low Risk</div>
+              <h4 id="rs-head">Analyzing...</h4>
+              <p id="rs-sum"></p>
+            </div>
+          </div>
+          <div class="result" id="rs-result">
+            <div class="rtag">Retention Risk Analysis &amp; Action Plan <button class="cbtn" onclick="cp('rs-rt')">Copy</button></div>
+            <div class="rtext" id="rs-rt"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THREE.JS -->
+<script>
+(function(){
+  const canvas=document.getElementById('bg');
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,1000);
+  camera.position.z=5;
+  const geo=new THREE.BufferGeometry();
+  const N=2000,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  const pal=[new THREE.Color('#FF3CAC'),new THREE.Color('#784BA0'),new THREE.Color('#2B86C5'),new THREE.Color('#00F5D4'),new THREE.Color('#FFE14D')];
+  for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*22;pos[i*3+1]=(Math.random()-.5)*22;pos[i*3+2]=(Math.random()-.5)*12;const c=pal[Math.floor(Math.random()*pal.length)];col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const mat=new THREE.PointsMaterial({size:.05,vertexColors:true,transparent:true,opacity:.65});
+  const pts=new THREE.Points(geo,mat);
+  scene.add(pts);
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/window.innerWidth-.5)*.35;my=(e.clientY/window.innerHeight-.5)*.35;});
+  window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+  let t=0;(function an(){requestAnimationFrame(an);t+=.0005;pts.rotation.y=t+mx;pts.rotation.x=my*.5;pts.rotation.z=t*.28;renderer.render(scene,camera);})();
+})();
+</script>
+
+<!-- APP LOGIC -->
+<script>
+let config = { provider:'gemini', key:'', proxy:'' };
+let c1=0,c2=0,ra=[];
+
+function updateHints(){
+  const p = document.getElementById('cfg-provider').value;
+  document.getElementById('setup-hint').innerHTML = p === 'gemini'
+    ? '📖 <strong>Step 1:</strong> Go to <a href="https://workers.cloudflare.com" target="_blank">workers.cloudflare.com</a> → Create Worker → Paste worker.js → Deploy → Copy the URL here.<br>📖 <strong>Step 2:</strong> Get your Gemini key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → API Keys.<br>📖 <strong>Step 3:</strong> Click Test Connection.'
+    : '📖 <strong>Step 1:</strong> Go to <a href="https://workers.cloudflare.com" target="_blank">workers.cloudflare.com</a> → Create Worker → Paste worker.js → Deploy → Copy the URL here.<br>📖 <strong>Step 2:</strong> Get your Anthropic key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.<br>📖 <strong>Step 3:</strong> Click Test Connection.';
+}
+
+function saveConfig(){
+  config.provider = document.getElementById('cfg-provider').value;
+  config.key = document.getElementById('cfg-key').value.trim();
+  config.proxy = document.getElementById('cfg-proxy').value.trim();
+  showStatus('dot-ok','✅ Config saved — click Test Connection to verify.');
+}
+
+async function testConnection(){
+  saveConfig();
+  if(!config.key || !config.proxy){
+    showStatus('dot-err','⚠️ Please fill in both the API key and proxy URL first.');
+    return;
+  }
+  showStatus('dot-ok','Testing connection...');
+  try{
+    const txt = await callAI('Reply with exactly: CONNECTION OK');
+    if(txt.includes('CONNECTION OK') || txt.length > 3){
+      showStatus('dot-ok','✅ Connection successful! AI is live and ready.');
+    } else {
+      showStatus('dot-err','⚠️ Got a response but it looks unexpected: '+txt.slice(0,80));
+    }
+  }catch(e){
+    showStatus('dot-err','❌ Failed: '+e.message+' — Check proxy URL and API key.');
+  }
+}
+
+function showStatus(dotClass, msg){
+  const s=document.getElementById('setup-status');
+  const d=document.getElementById('status-dot');
+  const m=document.getElementById('status-msg');
+  s.style.display='flex';
+  d.className='status-dot '+dotClass;
+  m.textContent=msg;
+}
+
+async function callAI(prompt){
+  if(!config.key) return '⚠️ No API key set. Go to the setup section above.';
+  if(!config.proxy) return '⚠️ No proxy URL set. Go to the setup section above.';
+
+  let payload;
+  if(config.provider === 'gemini'){
+    payload = {contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:1800,temperature:.75}};
+  } else {
+    payload = {model:'claude-sonnet-4-20250514', max_tokens:1800, messages:[{role:'user',content:prompt}]};
+  }
+
+  const res = await fetch(config.proxy, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({provider:config.provider, apiKey:config.key, payload})
+  });
+  const data = await res.json();
+  if(data.error) return '⚠️ API Error: '+(data.error.message||JSON.stringify(data.error));
+
+  if(config.provider === 'gemini'){
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
+  } else {
+    return data.content?.[0]?.text || 'No response.';
+  }
+}
+
+function sw(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+function clr(p){
+  document.querySelectorAll('[id^="'+p+'-"]').forEach(e=>{if(e.tagName==='INPUT'||e.tagName==='TEXTAREA')e.value='';});
+  const r=document.getElementById(p+'-result');if(r)r.classList.remove('show');
+  const m=document.getElementById(p+'-meter');if(m)m.classList.remove('show');
+}
+
+function cp(id){
+  navigator.clipboard.writeText(document.getElementById(id).innerText).then(()=>{
+    event.target.textContent='Copied!';setTimeout(()=>event.target.textContent='Copy',2200);
+  });
+}
+
+function g(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+
+function setLoad(p,on){
+  document.getElementById(p+'-loader').classList.toggle('on',on);
+  document.querySelectorAll('.btn-glow').forEach(b=>b.disabled=on);
+}
+
+async function genOnboard(){
+  const name=g('ob-name'),role=g('ob-role');
+  if(!name||!role){alert('Please enter the employee name and role.');return;}
+  setLoad('ob',true);document.getElementById('ob-result').classList.remove('show');
+  const txt=await callAI(`You are an expert HR onboarding specialist. Create a detailed 30-day onboarding plan.
+Employee: ${name} | Role: ${role} | Dept: ${g('ob-dept')||'Not specified'} | Start: ${g('ob-start')||'Upcoming'} | Level: ${g('ob-level')||'Not specified'} | Work: ${g('ob-work')} | Goals: ${g('ob-goals')||'Standard onboarding goals'}
+
+Write a structured 30-day plan:
+WEEK 1 — Orientation & Setup: 5 specific tasks for admin, tools, culture, introductions.
+WEEK 2 — Learning & Immersion: 5 tasks for role-specific learning, meeting stakeholders.
+WEEK 3 — First Contributions: 5 tasks for first real deliverables and early wins.
+WEEK 4 — Review & Ramp-Up: 5 tasks for 30-day check-in, feedback, setting next goals.
+SUCCESS SIGNALS: 3 concrete signs ${name} is ramping well by day 30.
+Be specific to the role, practical, and warm in tone.`);
+  document.getElementById('ob-rt').textContent=txt;
+  document.getElementById('ob-result').classList.add('show');
+  setLoad('ob',false);c1++;document.getElementById('s1').textContent=c1;
+}
+
+async function genExit(){
+  const name=g('ex-name'),role=g('ex-role');
+  if(!name||!role){alert('Please enter employee name and role.');return;}
+  setLoad('ex',true);document.getElementById('ex-result').classList.remove('show');
+  const txt=await callAI(`You are an expert HR strategist. Create a comprehensive Exit Intelligence Report.
+Employee: ${name} | Role: ${role} | Tenure: ${g('ex-years')||'N/A'} | Reason: ${g('ex-reason')||'N/A'}
+Exit Notes: ${g('ex-notes')||'None'} | Projects: ${g('ex-projects')||'N/A'}
+
+Generate a structured report with:
+1. KNOWLEDGE TRANSFER CHECKLIST — 6 concrete handover items.
+2. INSTITUTIONAL KNOWLEDGE AT RISK — What walks out the door.
+3. SIGNALS FROM THIS EXIT — Systemic patterns in their feedback.
+4. BACKFILL HIRING GUIDANCE — 4 qualities to prioritize in replacement.
+5. IMMEDIATE ACTION ITEMS FOR MANAGEMENT — 3 things to do in next 2 weeks.
+Be honest, practical, and direct.`);
+  document.getElementById('ex-rt').textContent=txt;
+  document.getElementById('ex-result').classList.add('show');
+  setLoad('ex',false);c2++;document.getElementById('s2').textContent=c2;
+}
+
+async function genRisk(){
+  const name=g('rs-name'),role=g('rs-role');
+  if(!name||!role){alert('Please enter employee name and role.');return;}
+  setLoad('rs',true);
+  document.getElementById('rs-result').classList.remove('show');
+  document.getElementById('rs-meter').classList.remove('show');
+  const txt=await callAI(`You are a people analytics expert. Analyze this employee profile.
+Employee: ${name} | Role: ${role} | Tenure: ${g('rs-tenure')} | Perf: ${g('rs-perf')}
+Observations: ${g('rs-obs')||'None'} | Company Changes: ${g('rs-changes')||'None'}
+
+Respond in EXACTLY this format:
+RISK_SCORE: [integer 0-100]
+RISK_LEVEL: [Low / Medium / High]
+HEADLINE: [one sentence max 12 words]
+SUMMARY: [2 sentences on key risk factors]
+
+FULL ANALYSIS:
+Para 1: What the signals suggest.
+Para 2: Root cause hypothesis.
+Para 3: What's at stake if they leave.
+Para 4: Top 3 specific interventions ranked by impact.`);
+
+  const sM=txt.match(/RISK_SCORE:\s*(\d+)/),lM=txt.match(/RISK_LEVEL:\s*(Low|Medium|High)/i);
+  const hM=txt.match(/HEADLINE:\s*(.+)/),smM=txt.match(/SUMMARY:\s*([\s\S]+?)(?=\nFULL ANALYSIS:|$)/);
+  const fM=txt.match(/FULL ANALYSIS:\s*([\s\S]+)/);
+  const score=sM?parseInt(sM[1]):50,level=lM?lM[1]:'Medium';
+  const isH=score>=65,isM=score>=35&&score<65;
+  const rc=isH?'#FF3CAC':isM?'#FFE14D':'#00F5D4';
+  const ring=document.getElementById('rs-ring');
+  ring.style.setProperty('--rc',rc);ring.style.setProperty('--rp',score+'%');
+  document.getElementById('rs-num').textContent=score;document.getElementById('rs-num').style.color=rc;
+  const badge=document.getElementById('rs-badge');
+  badge.className='rbadge '+(isH?'rb-high':isM?'rb-med':'rb-low');
+  badge.textContent=(isH?'High':isM?'Medium':'Low')+' Risk';
+  document.getElementById('rs-head').textContent=hM?hM[1].trim():name+' needs attention';
+  document.getElementById('rs-sum').textContent=smM?smM[1].trim():'';
+  document.getElementById('rs-meter').classList.add('show');
+  document.getElementById('rs-rt').textContent=fM?fM[1].trim():txt;
+  document.getElementById('rs-result').classList.add('show');
+  setLoad('rs',false);
+  ra.push(score);document.getElementById('s3').textContent=Math.round(ra.reduce((a,b)=>a+b,0)/ra.length)+'%';
+}
+</script>
+</body>
+</html>
